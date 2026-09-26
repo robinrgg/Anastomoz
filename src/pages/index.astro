@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Braids from '../components/Braids.astro';
+import ContactCta from '../components/ContactCta.astro';
 import { formatDate } from '../lib/date';
 import { url } from '../lib/url';
 
@@ -257,14 +258,7 @@ const actualites = (await getCollection('actualites', ({ data }) => !data.draft)
     )
   }
 
-  <!-- Appel à l'action -->
-  <section class="section cta">
-    <div class="container cta__inner">
-      <h2>Un projet sur un cours d’eau ou un plan d’eau ?</h2>
-      <p class="lead">Parlons-en : chaque étude commence par une bonne compréhension du terrain.</p>
-      <a class="button button--primary" href={url('/contact/')}>Nous écrire</a>
-    </div>
-  </section>
+  <ContactCta />
 </BaseLayout>
 
 <style>
@@ -376,7 +370,7 @@ const actualites = (await getCollection('actualites', ({ data }) => !data.draft)
 
   .definition__meta span {
     margin-right: var(--space-2);
-    color: var(--color-sand-500);
+    color: var(--color-sand-700);
     font-weight: 600;
   }
 
@@ -571,15 +565,5 @@ const actualites = (await getCollection('actualites', ({ data }) => !data.draft)
 
   .news__item h3 a:hover {
     text-decoration: underline;
-  }
-
-  /* ---------- Appel à l'action ---------- */
-  .cta__inner {
-    max-width: 44rem;
-    text-align: center;
-  }
-
-  .cta__inner .lead {
-    margin-bottom: var(--space-5);
   }
 </style>

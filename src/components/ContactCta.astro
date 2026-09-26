@@ -1,0 +1,32 @@
+---
+import { url } from '../lib/url';
+
+interface Props {
+  title?: string;
+  text?: string;
+}
+
+const {
+  title = 'Un projet sur un cours d’eau ou un plan d’eau ?',
+  text = 'Parlons-en : chaque étude commence par une bonne compréhension du terrain.',
+} = Astro.props;
+---
+
+<section class="section cta">
+  <div class="container cta__inner">
+    <h2>{title}</h2>
+    <p class="lead">{text}</p>
+    <a class="button button--primary" href={url('/contact/')}>Nous écrire</a>
+  </div>
+</section>
+
+<style>
+  .cta__inner {
+    max-width: 44rem;
+    text-align: center;
+  }
+
+  .lead {
+    margin-bottom: var(--space-5);
+  }
+</style>

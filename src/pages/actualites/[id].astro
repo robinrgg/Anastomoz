@@ -2,6 +2,8 @@
 import { Image } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Braids from '../../components/Braids.astro';
+import ContactCta from '../../components/ContactCta.astro';
 import { formatDate } from '../../lib/date';
 import { url } from '../../lib/url';
 
@@ -16,21 +18,71 @@ const { title, description, date, image, imageAlt } = article.data;
 ---
 
 <BaseLayout title={title} description={description} ogImage={image?.src}>
-  <article class="container prose page">
-    <p><a href={url('/actualites/')}>← Toutes les actualités</a></p>
-    <h1>{title}</h1>
-    <p class="date"><time datetime={date.toISOString()}>{formatDate(date)}</time></p>
-    {image && <Image src={image} alt={imageAlt ?? ''} widths={[480, 800, 1200]} sizes="(min-width: 42rem) 42rem, 100vw" />}
-    <Content />
+  <article>
+    <header class="article-header">
+      <div class="container prose">
+        <p><a class="back" href={url('/actualites/')}>← Toutes les actualités</a></p>
+        <p class="eyebrow">
+          <time datetime={date.toISOString()}>{formatDate(date)}</time>
+        </p>
+        <h1>{title}</h1>
+        <p class="lead">{description}</p>
+      </div>
+      <Braids />
+    </header>
+
+    {
+      image && (
+        <div class="container article-image">
+          <Image
+            src={image}
+            alt={imageAlt ?? ''}
+            widths={[640, 1024, 1600]}
+            sizes="(min-width: 60rem) 56rem, 100vw"
+            quality={75}
+          />
+        </div>
+      )
+    }
+
+    <div class="container prose article-body">
+      <Content />
+    </div>
   </article>
+
+  <ContactCta />
 </BaseLayout>
 
 <style>
-  .date {
-    color: var(--color-text-muted);
+  .article-header {
+    padding-top: var(--space-6);
+    background: var(--color-sand-100);
   }
 
-  article :global(img) {
+  .article-header h1 {
+    font-size: var(--step-3);
+  }
+
+  .back {
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .article-image {
+    margin-top: var(--space-5);
+    max-width: 56rem;
+  }
+
+  .article-image img {
+    width: 100%;
+    border-radius: var(--radius);
+  }
+
+  .article-body {
+    padding-block: var(--space-5) var(--space-6);
+  }
+
+  .article-body :global(img) {
     border-radius: var(--radius);
   }
 </style>

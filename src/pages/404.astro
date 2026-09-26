@@ -1,12 +1,14 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
 import { url } from '../lib/url';
 ---
 
 <BaseLayout title="Page introuvable">
-  <div class="container prose page">
-    <h1>Page introuvable</h1>
-    <p>Cette page n’existe pas ou a été déplacée.</p>
-    <p><a href={url('/')}>Retour à l’accueil</a></p>
-  </div>
+  <PageHeader eyebrow="Erreur 404" title="Ce chenal ne mène nulle part" lead="La page demandée n’existe pas ou a été déplacée." />
+  <section class="section">
+    <div class="container">
+      <a class="button button--primary" href={url('/')}>Retour à l’accueil</a>
+    </div>
+  </section>
 </BaseLayout>

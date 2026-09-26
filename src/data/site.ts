@@ -14,9 +14,11 @@ export const site = {
     phone: '[téléphone]',
     city: '[ville]',
   },
+  // Afficher les prix sur la page Prestations (voir src/data/prestations.ts).
+  showPrices: false,
   // Piloté par la variable SITE_INDEXABLE (voir astro.config.mjs et ARCHITECTURE.md).
   indexable: SITE_INDEXABLE,
-} as const;
+};
 
 export const navigation = [
   { href: '/', label: 'Accueil' },

@@ -1,50 +1,118 @@
 ---
+import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { url } from '../../lib/url';
+import PageHeader from '../../components/PageHeader.astro';
 import { formatDate } from '../../lib/date';
+import { url } from '../../lib/url';
+import headerImage from '../../assets/photos/biometrie-neige.jpg';
 
 const articles = (await getCollection('actualites', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
 );
 ---
 
-<BaseLayout title="Actualités" description="Les actualités du bureau d’études Anastomoz.">
-  <div class="container prose page">
-    <h1>Actualités</h1>
-    {articles.length === 0 && <p>Aucune actualité pour le moment.</p>}
-    <ul class="articles">
-      {
-        articles.map((article) => (
-          <li>
-            <h2>
-              <a href={url(`/actualites/${article.id}/`)}>{article.data.title}</a>
-            </h2>
-            <p class="date">
-              <time datetime={article.data.date.toISOString()}>{formatDate(article.data.date)}</time>
-            </p>
-            <p>{article.data.description}</p>
-          </li>
-        ))
-      }
-    </ul>
-  </div>
+<BaseLayout title="Actualités" description="Les actualités du bureau d’études Anastomoz : terrain, études, vie de la coopérative.">
+  <PageHeader
+    eyebrow="Actualités"
+    title="Des nouvelles du terrain"
+    lead="Campagnes de pêche, études en cours et vie de la coopérative."
+    image={headerImage}
+    focus="center"
+  />
+
+  <section class="section">
+    <div class="container">
+      {articles.length === 0 && <p class="lead">Aucune actualité pour le moment.</p>}
+      <ul class="articles">
+        {
+          articles.map((article) => (
+            <li class="article-card">
+              {article.data.image && (
+                <Image
+                  src={article.data.image}
+                  alt=""
+                  widths={[400, 640, 900]}
+                  sizes="(min-width: 64rem) 33vw, (min-width: 40rem) 50vw, 100vw"
+                  quality={70}
+                />
+              )}
+              <p class="article-card__date">
+                <time datetime={article.data.date.toISOString()}>{formatDate(article.data.date)}</time>
+              </p>
+              <h2>
+                <a href={url(`/actualites/${article.id}/`)}>{article.data.title}</a>
+              </h2>
+              <p>{article.data.description}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
 </BaseLayout>
 
 <style>
   .articles {
+    display: grid;
+    gap: var(--space-6) var(--space-5);
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .articles h2 {
-    margin-bottom: 0;
-    font-size: 1.375rem;
+  @media (min-width: 40rem) {
+    .articles {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
-  .date {
-    margin-top: var(--space-1);
+  @media (min-width: 64rem) {
+    .articles {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .article-card {
+    position: relative;
+  }
+
+  .article-card img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: var(--space-3);
+  }
+
+  .article-card__date {
+    margin-bottom: var(--space-2);
+    font-size: var(--step--1);
     color: var(--color-text-muted);
-    font-size: 0.9375rem;
+  }
+
+  .article-card h2 {
+    font-size: var(--step-1);
+  }
+
+  .article-card h2 a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Toute la carte est cliquable, le lien reste unique pour les lecteurs d'écran. */
+  .article-card h2 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .article-card:hover h2 a {
+    text-decoration: underline;
+  }
+
+  .article-card p:last-child {
+    margin: 0;
+    color: var(--color-text-muted);
   }
 </style>

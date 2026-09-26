@@ -1,20 +1,220 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
-
-// Liste provisoire, à valider et compléter.
-const prestations = [
-  'Inventaires piscicoles par pêche électrique',
-  'Suivis piscicoles des plans d’eau et retenues',
-  'Biométrie et analyse des peuplements',
-  'Continuité écologique et dispositifs de franchissement',
-  'Conseil en gestion piscicole et halieutique',
-];
+import PageHeader from '../components/PageHeader.astro';
+import ContactCta from '../components/ContactCta.astro';
+import { domaines } from '../data/prestations';
+import { site } from '../data/site';
+import headerImage from '../assets/photos/passe-a-poissons.jpg';
 ---
 
-<BaseLayout title="Prestations" description="Les prestations du bureau d’études Anastomoz.">
-  <div class="container prose page">
-    <h1>Prestations</h1>
-    <ul>{prestations.map((p) => <li>{p}</li>)}</ul>
-    <p class="placeholder">Contenu provisoire : détail des prestations à rédiger.</p>
-  </div>
+<BaseLayout
+  title="Prestations"
+  description="Inventaires piscicoles, plans d’eau, continuité écologique, conseil et gestion halieutique : les prestations d’Anastomoz."
+>
+  <PageHeader
+    eyebrow="Prestations"
+    title="Des études de terrain au conseil"
+    lead="Quatre domaines d’intervention, des protocoles reconnus et des livrables pensés pour la décision."
+    image={headerImage}
+    focus="center"
+  />
+
+  <nav class="section-nav container" aria-label="Domaines d’intervention">
+    <ul>
+      {
+        domaines.map((domaine) => (
+          <li>
+            <a href={`#${domaine.id}`}>{domaine.title}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+
+  {
+    domaines.map((domaine, i) => (
+      <section id={domaine.id} class:list={['section', 'domaine', { 'section--sand': i % 2 === 1 }]}>
+        <div class:list={['container', 'domaine__grid', { 'domaine__grid--reverse': i % 2 === 1 }]}>
+          <Image
+            class="domaine__image"
+            src={domaine.image}
+            alt={domaine.imageAlt}
+            widths={[480, 800, 1200]}
+            sizes="(min-width: 60rem) 45vw, 100vw"
+            quality={70}
+          />
+          <div>
+            <p class="eyebrow">{String(i + 1).padStart(2, '0')}</p>
+            <h2>{domaine.title}</h2>
+            <p class="lead">{domaine.summary}</p>
+
+            <h3>Prestations</h3>
+            <ul class="list">
+              {domaine.prestations.map((p) => (
+                <li>
+                  {p.title}
+                  {site.showPrices && p.prix && <span class="price">{p.prix}</span>}
+                </li>
+              ))}
+            </ul>
+
+            <h3>Livrables</h3>
+            <ul class="list list--muted">
+              {domaine.livrables.map((l) => (
+                <li>{l}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+    ))
+  }
+
+  <section class="section section--navy">
+    <div class="container devis">
+      <div>
+        <p class="eyebrow">Tarifs</p>
+        <h2>Sur devis, adapté à chaque site</h2>
+      </div>
+      <p>
+        Chaque cours d’eau, chaque plan d’eau est différent : accès, surface, nombre de stations,
+        saison. Nous établissons un devis détaillé à partir de votre cahier des charges, et
+        répondons aux consultations et marchés publics.
+      </p>
+    </div>
+  </section>
+
+  <ContactCta title="Un cahier des charges, une question de méthode ?" />
 </BaseLayout>
+
+<style>
+  .section-nav {
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-foam-100);
+  }
+
+  .section-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .section-nav a {
+    display: inline-block;
+    padding: 0.4em 1em;
+    border: 1px solid var(--color-mist-300);
+    border-radius: 999px;
+    font-weight: 500;
+    color: var(--color-navy-700);
+    text-decoration: none;
+  }
+
+  .section-nav a:hover {
+    border-color: var(--color-sand-500);
+    background: var(--color-sand-100);
+  }
+
+  .domaine {
+    scroll-margin-top: 5rem;
+  }
+
+  .domaine__grid {
+    display: grid;
+    gap: var(--space-5);
+    align-items: start;
+  }
+
+  @media (min-width: 60rem) {
+    .domaine__grid {
+      grid-template-columns: 5fr 6fr;
+      gap: var(--space-6);
+    }
+
+    .domaine__grid--reverse > :first-child {
+      order: 2;
+    }
+  }
+
+  .domaine :global(.domaine__image) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  h3 {
+    margin-top: var(--space-4);
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-steel-600);
+  }
+
+  .list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .list li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: var(--space-2) 0 var(--space-2) var(--space-4);
+    border-bottom: 1px solid rgb(168 184 196 / 0.4);
+    position: relative;
+  }
+
+  .list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 1.05em;
+    width: 0.75rem;
+    height: 2px;
+    background: var(--color-sand-500);
+  }
+
+  .list--muted li {
+    color: var(--color-text-muted);
+  }
+
+  .price {
+    font-weight: 600;
+    color: var(--color-navy-700);
+  }
+
+  .devis {
+    display: grid;
+    gap: var(--space-4);
+    align-items: center;
+  }
+
+  @media (min-width: 56rem) {
+    .devis {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+    }
+  }
+
+  .devis .eyebrow {
+    color: var(--color-mist-300);
+  }
+
+  .devis h2 {
+    margin: 0;
+  }
+
+  .devis p:last-child {
+    margin: 0;
+    font-size: var(--step-1);
+    color: var(--color-foam-100);
+  }
+</style>

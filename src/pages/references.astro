@@ -1,10 +1,171 @@
 ---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import ContactCta from '../components/ContactCta.astro';
+import { domaines } from '../data/prestations';
+import headerImage from '../assets/photos/gorges-vasque.jpg';
+
+const references = (await getCollection('references', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.annee - a.data.annee,
+);
+
+const domaineTitle = (id: string) => domaines.find((d) => d.id === id)?.title ?? id;
+
+const partenaires = [
+  'Collectivités et intercommunalités',
+  'Syndicats de rivière et établissements publics de bassin',
+  'Fédérations et associations de pêche',
+  'Gestionnaires d’ouvrages hydrauliques',
+  'Services de l’État et établissements publics',
+  'Bureaux d’études et entreprises de travaux',
+];
 ---
 
-<BaseLayout title="Références" description="Les références et études de cas d’Anastomoz.">
-  <div class="container prose page">
-    <h1>Références</h1>
-    <p class="placeholder">Page en construction : études de cas et références à venir.</p>
-  </div>
+<BaseLayout title="Références" description="Les références et études réalisées par Anastomoz.">
+  <PageHeader
+    eyebrow="Références"
+    title="Nos études"
+    lead="Inventaires, suivis et diagnostics réalisés pour des maîtres d’ouvrage publics et privés."
+    image={headerImage}
+    focus="bottom"
+  />
+
+  <section class="section">
+    <div class="container">
+      {
+        references.length === 0 ? (
+          <div class="empty">
+            <h2>Premières références à venir</h2>
+            <p class="lead">
+              Anastomoz est en cours de création : nos premières études seront présentées ici au
+              fil de leur réalisation.
+            </p>
+          </div>
+        ) : (
+          <ul class="refs">
+            {references.map((ref) => (
+              <li class="ref">
+                {ref.data.image && (
+                  <Image
+                    src={ref.data.image}
+                    alt={ref.data.imageAlt ?? ''}
+                    widths={[400, 640]}
+                    sizes="(min-width: 64rem) 33vw, (min-width: 40rem) 50vw, 100vw"
+                    quality={70}
+                  />
+                )}
+                <div class="ref__body">
+                  <p class="ref__meta">
+                    {domaineTitle(ref.data.domaine)} · {ref.data.annee}
+                  </p>
+                  <h2>{ref.data.title}</h2>
+                  <p class="ref__client">
+                    {ref.data.client} — {ref.data.lieu}
+                  </p>
+                  <p>{ref.data.description}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="section section--sand">
+    <div class="container">
+      <p class="eyebrow">Pour qui</p>
+      <h2>Ils peuvent faire appel à nous</h2>
+      <ul class="partenaires">
+        {partenaires.map((p) => <li>{p}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <ContactCta />
 </BaseLayout>
+
+<style>
+  .empty {
+    max-width: 44rem;
+  }
+
+  .refs {
+    display: grid;
+    gap: var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 40rem) {
+    .refs {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .refs {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .ref {
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--color-white);
+    box-shadow: var(--shadow);
+  }
+
+  .ref img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+
+  .ref__body {
+    padding: var(--space-4);
+  }
+
+  .ref h2 {
+    font-size: var(--step-1);
+  }
+
+  .ref__meta {
+    margin-bottom: var(--space-2);
+    font-size: var(--step--1);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-sand-700);
+  }
+
+  .ref__client {
+    font-weight: 600;
+    color: var(--color-steel-600);
+  }
+
+  .partenaires {
+    display: grid;
+    gap: var(--space-3);
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 48rem) {
+    .partenaires {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .partenaires li {
+    padding: var(--space-4);
+    border-left: 3px solid var(--color-sand-500);
+    background: var(--color-white);
+    font-weight: 500;
+    color: var(--color-navy-700);
+  }
+</style>

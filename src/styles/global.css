@@ -17,6 +17,8 @@
   --color-foam-100: #eef3f6;
   --color-sand-500: #c8872e;
   --color-sand-100: #f7f1e8;
+  /* Ocre foncé : seule variante assez contrastée pour du texte sur fond clair. */
+  --color-sand-700: #8a5716;
   --color-white: #ffffff;
   --color-text: #13222f;
   --color-text-muted: #4a5a68;
@@ -187,9 +189,11 @@ p {
   padding: 0.8em 1.4em;
   border: 2px solid transparent;
   border-radius: 999px;
+  font: inherit;
   font-weight: 600;
   line-height: 1.2;
   text-decoration: none;
+  cursor: pointer;
   transition:
     background-color 0.2s,
     color 0.2s,
@@ -291,6 +295,6 @@ p {
   padding-block: var(--space-6) var(--space-7);
 }
 
-.page h1 {
-  font-size: var(--step-3);
+.section--navy .eyebrow {
+  color: var(--color-mist-300);
 }

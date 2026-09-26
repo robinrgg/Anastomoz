@@ -44,8 +44,11 @@ src/
     photos/              Photos (déjà nettoyées de leurs métadonnées)
   components/            Éléments réutilisables (en-tête, pied de page…)
   content/actualites/    Un fichier Markdown par actualité
-  content.config.ts      Champs obligatoires d'une actualité
-  data/site.ts           Nom, coordonnées, menu : les informations centrales
+  content/references/    Un fichier Markdown par référence (voir modele.md)
+  content.config.ts      Champs obligatoires des actualités et références
+  data/site.ts           Nom, coordonnées, menu, affichage des prix
+  data/prestations.ts    Catalogue des prestations (prix facultatifs)
+  data/equipe.ts         Membres de l'équipe
   layouts/               Gabarit commun à toutes les pages
   lib/                   Petites fonctions utilitaires
   pages/                 Une page = un fichier (l'adresse suit le nom du fichier)
@@ -62,6 +65,7 @@ L'adresse est fournie à la construction par deux variables d'environnement :
 | `SITE_URL` | renseignée automatiquement par le workflow | `https://www.domaine.fr` |
 | `BASE_PATH` | renseignée automatiquement (`/Anastomoz`) | `/` |
 | `SITE_INDEXABLE` | `false` (défaut) | `true` |
+| `CONTACT_ENDPOINT` | vide : formulaire affiché mais désactivé | adresse du script d'envoi |
 
 Dans le code, les liens internes passent **toujours** par la fonction `url()`
 (`src/lib/url.ts`), pour fonctionner aussi bien sous `/Anastomoz/` qu'à la racine
@@ -93,7 +97,7 @@ Le dossier `photos-originales/` est ignoré par Git.
 
 ## Formulaire de contact (à venir)
 
-- Pendant le développement : formulaire construit, mais sans envoi.
+- Pendant le développement : formulaire construit (validation, champ piège, mention RGPD) mais désactivé tant que `CONTACT_ENDPOINT` est vide.
 - À la mise en ligne : script d'envoi hébergé chez l'hébergeur définitif (données
   en France, sans service tiers). Anti-spam sans Google : champ piège, contrôle
   de délai, [ALTCHA](https://altcha.org) si nécessaire.
@@ -108,8 +112,8 @@ Le dossier `photos-originales/` est ignoré par Git.
 ## Plan de travail
 
 1. [x] Socle technique : Astro, construction automatique, sécurité, pages légales modèles
-2. [ ] Direction visuelle : maquette de la page d'accueil (proposée, en attente de validation)
-3. [ ] Pages de contenu : Accueil, Prestations, Références, Équipe, Actualités, Contact
+2. [x] Direction visuelle : maquette de la page d'accueil
+3. [x] Pages de contenu : Accueil, Prestations, Références, Équipe, Actualités, Contact (textes à valider)
 4. [ ] Actualités : notice de publication autonome
 5. [ ] Carte Hub'Eau
 6. [ ] Mise en ligne (voir ci-dessous)
@@ -123,6 +127,8 @@ Le dossier `photos-originales/` est ignoré par Git.
 - [ ] Coordonnées réelles dans `src/data/site.ts`
 - [ ] Envoi du formulaire de contact branché et testé
 - [ ] Outil de mesure d'audience exempté de consentement (CNIL) choisi
+- [ ] Photos définitives de l'équipe (`src/assets/equipe/`, via `npm run photos`)
+- [ ] Forme de la SCOP (SARL ou SAS) reportée dans les mentions légales et les fonctions de l'équipe
 - [ ] Logo définitif en SVG, avec une version simplifiée pour l'icône
 - [ ] Plan du site (sitemap) pour les moteurs de recherche
 - [ ] Dépôt passé en privé

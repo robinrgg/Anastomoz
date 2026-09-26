@@ -21,6 +21,9 @@ export default defineConfig({
       // Passer à true le jour de la mise en ligne définitive : tant que c'est
       // false, le site demande aux moteurs de recherche de ne pas l'indexer.
       SITE_INDEXABLE: envField.boolean({ context: 'server', access: 'public', default: false }),
+      // Adresse du script d'envoi du formulaire de contact, sur l'hébergeur définitif
+      // (ex. /contact.php). Tant qu'elle est vide, le formulaire est affiché mais désactivé.
+      CONTACT_ENDPOINT: envField.string({ context: 'server', access: 'public', optional: true }),
     },
   },
   security: {

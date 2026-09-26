@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
 import { site } from '../data/site';
 import { url } from '../lib/url';
 
@@ -8,12 +9,12 @@ import { url } from '../lib/url';
 ---
 
 <BaseLayout title="Mentions légales" description="Mentions légales du site Anastomoz.">
+  <PageHeader eyebrow="Informations légales" title="Mentions légales" />
   <div class="container prose page">
-    <h1>Mentions légales</h1>
 
     <h2>Éditeur du site</h2>
     <p>
-      {site.name}, [forme juridique] au capital de [montant] €<br />
+      {site.name}, société coopérative et participative (SCOP) [SARL ou SAS] à capital variable<br />
       Siège social : [adresse complète]<br />
       Immatriculée au RCS de [ville] sous le numéro [SIREN]<br />
       SIRET : [numéro] — N° de TVA intracommunautaire : [numéro]<br />
@@ -21,7 +22,7 @@ import { url } from '../lib/url';
     </p>
 
     <h2>Directeur de la publication</h2>
-    <p>[Prénom Nom], en qualité de [fonction].</p>
+    <p>[Prénom Nom], en qualité de [cogérant·e ou président·e selon la forme retenue].</p>
 
     <h2>Hébergeur</h2>
     <p>[Nom de l’hébergeur], [adresse], [téléphone].</p>

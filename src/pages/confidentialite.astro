@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
 import { site } from '../data/site';
 
 // Modèle à relire et compléter avant la mise en ligne (RGPD).
@@ -9,8 +10,8 @@ import { site } from '../data/site';
   title="Politique de confidentialité"
   description="Politique de confidentialité et de protection des données du site Anastomoz."
 >
+  <PageHeader eyebrow="Informations légales" title="Politique de confidentialité" lead="Comment nous traitons les données que vous nous confiez." />
   <div class="container prose page">
-    <h1>Politique de confidentialité</h1>
 
     <h2>Responsable du traitement</h2>
     <p>{site.name}, [adresse du siège], joignable à l’adresse {site.contact.email}.</p>

@@ -1,10 +1,156 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import ContactCta from '../components/ContactCta.astro';
+import { equipe } from '../data/equipe';
+import headerImage from '../assets/photos/equipe-riviere.jpg';
+
+const valeurs = [
+  {
+    title: 'Des salariés associés',
+    text: 'Les salariés détiennent la majorité du capital et des droits de vote : l’entreprise appartient à ceux qui font les études.',
+  },
+  {
+    title: 'Une personne, une voix',
+    text: 'Les décisions se prennent collectivement, quel que soit le capital détenu par chacun.',
+  },
+  {
+    title: 'Un projet durable',
+    text: 'Une part des bénéfices est mise en réserve pour pérenniser la coopérative et ses emplois.',
+  },
+];
 ---
 
-<BaseLayout title="Équipe" description="L’équipe d’Anastomoz.">
-  <div class="container prose page">
-    <h1>Équipe</h1>
-    <p class="placeholder">Page en construction : présentation de l’équipe à venir.</p>
-  </div>
+<BaseLayout title="Équipe" description="L’équipe d’Anastomoz, bureau d’études en milieux aquatiques constitué en coopérative.">
+  <PageHeader
+    eyebrow="Équipe"
+    title="Une équipe de terrain"
+    lead="Des passionnés de rivières et de poissons, réunis dans une coopérative pour des études indépendantes et rigoureuses."
+    image={headerImage}
+    focus="center"
+  />
+
+  <section class="section">
+    <div class="container">
+      <ul class="team">
+        {
+          equipe.map((membre) => (
+            <li class="member">
+              <Image
+                src={membre.photo}
+                alt={membre.photoAlt}
+                widths={[400, 640, 900]}
+                sizes="(min-width: 48rem) 40vw, 100vw"
+                quality={70}
+                class="member__photo"
+              />
+              <div class="member__body">
+                <h2>{membre.name}</h2>
+                <p class="member__role">{membre.role}</p>
+                <p class="member__specialite">{membre.specialite}</p>
+                <p>{membre.bio}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--sand">
+    <div class="container">
+      <p class="eyebrow">Une SCOP</p>
+      <h2>Une société coopérative</h2>
+      <p class="lead scop-lead">
+        Anastomoz se constitue en société coopérative et participative (SCOP) : une entreprise
+        détenue et gouvernée par ses salariés.
+      </p>
+      <ul class="valeurs">
+        {
+          valeurs.map((valeur) => (
+            <li>
+              <h3>{valeur.title}</h3>
+              <p>{valeur.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <ContactCta title="Envie de travailler avec nous ?" text="Projets, partenariats ou candidatures : écrivez-nous." />
 </BaseLayout>
+
+<style>
+  .team {
+    display: grid;
+    gap: var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 48rem) {
+    .team {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-5);
+    }
+  }
+
+  .member :global(.member__photo) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: var(--radius);
+    object-position: center 30%;
+    box-shadow: var(--shadow);
+  }
+
+  .member__body {
+    padding-top: var(--space-4);
+  }
+
+  .member h2 {
+    margin-bottom: var(--space-1);
+    font-size: var(--step-2);
+  }
+
+  .member__role {
+    margin-bottom: var(--space-1);
+    font-weight: 600;
+    color: var(--color-sand-700);
+  }
+
+  .member__specialite {
+    color: var(--color-steel-600);
+  }
+
+  .scop-lead {
+    max-width: 44rem;
+  }
+
+  .valeurs {
+    display: grid;
+    gap: var(--space-5);
+    margin: var(--space-5) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 48rem) {
+    .valeurs {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .valeurs li {
+    padding-top: var(--space-3);
+    border-top: 2px solid var(--color-sand-500);
+  }
+
+  .valeurs p {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+</style>

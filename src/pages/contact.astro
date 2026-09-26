@@ -1,14 +1,227 @@
 ---
+import { CONTACT_ENDPOINT } from 'astro:env/server';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { site } from '../data/site';
+import { url } from '../lib/url';
+import headerImage from '../assets/photos/peche-electrique-epuisettes.jpg';
+
+const formActive = Boolean(CONTACT_ENDPOINT);
 ---
 
-<BaseLayout title="Contact" description="Contacter le bureau d’études Anastomoz.">
-  <div class="container prose page">
-    <h1>Contact</h1>
-    <p class="placeholder">
-      Le formulaire de contact (nom, prénom, structure, e-mail, téléphone, message) sera construit
-      à l’étape « Pages de contenu ». Son envoi sera branché le jour de la mise en ligne, sur
-      l’hébergeur définitif.
-    </p>
-  </div>
+<BaseLayout title="Contact" description="Contacter le bureau d’études Anastomoz : demande de devis, question technique, partenariat.">
+  <PageHeader
+    eyebrow="Contact"
+    title="Parlons de votre projet"
+    lead="Une étude à mener, une question de méthode, un cahier des charges à préparer : nous vous répondons rapidement."
+    image={headerImage}
+    focus="center"
+  />
+
+  <section class="section">
+    <div class="container contact">
+      <form class="form" method="post" action={formActive ? CONTACT_ENDPOINT : undefined} aria-describedby="form-rgpd">
+        {
+          !formActive && (
+            <p class="form__notice" role="status">
+              Formulaire en cours de mise en service : en attendant, écrivez-nous directement à
+              l’adresse indiquée ci-contre.
+            </p>
+          )
+        }
+
+        <fieldset disabled={!formActive}>
+          <legend class="visually-hidden">Vos coordonnées et votre message</legend>
+
+          <div class="form__row">
+            <div class="field">
+              <label for="prenom">Prénom <span aria-hidden="true">*</span></label>
+              <input id="prenom" name="prenom" type="text" autocomplete="given-name" required maxlength="80" />
+            </div>
+            <div class="field">
+              <label for="nom">Nom <span aria-hidden="true">*</span></label>
+              <input id="nom" name="nom" type="text" autocomplete="family-name" required maxlength="80" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="structure">Société, collectivité ou association</label>
+            <input id="structure" name="structure" type="text" autocomplete="organization" maxlength="120" />
+          </div>
+
+          <div class="form__row">
+            <div class="field">
+              <label for="email">Adresse e-mail <span aria-hidden="true">*</span></label>
+              <input id="email" name="email" type="email" autocomplete="email" required maxlength="160" />
+            </div>
+            <div class="field">
+              <label for="telephone">Téléphone</label>
+              <input id="telephone" name="telephone" type="tel" autocomplete="tel" maxlength="30" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="message">Votre message <span aria-hidden="true">*</span></label>
+            <textarea id="message" name="message" rows="7" required minlength="10" maxlength="5000"></textarea>
+          </div>
+
+          <!-- Champ piège anti-robots : invisible pour les humains, il doit rester vide. -->
+          <div class="field field--trap" aria-hidden="true">
+            <label for="site_web">Ne pas remplir ce champ</label>
+            <input id="site_web" name="site_web" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+
+          <p class="form__required"><span aria-hidden="true">*</span> Champs obligatoires</p>
+
+          <button class="button button--primary" type="submit">Envoyer le message</button>
+        </fieldset>
+
+        <p id="form-rgpd" class="form__rgpd">
+          Les informations saisies servent uniquement à répondre à votre demande. Elles ne sont
+          jamais cédées à des tiers et sont conservées trois ans au plus. Vous pouvez exercer vos
+          droits à tout moment : voir notre{' '}
+          <a href={url('/confidentialite/')}>politique de confidentialité</a>.
+        </p>
+      </form>
+
+      <aside class="coords" aria-labelledby="coords-titre">
+        <h2 id="coords-titre">Coordonnées</h2>
+        <dl>
+          <dt>E-mail</dt>
+          <dd>{site.contact.email}</dd>
+          <dt>Téléphone</dt>
+          <dd>{site.contact.phone}</dd>
+          <dt>Siège</dt>
+          <dd>{site.contact.city}</dd>
+        </dl>
+        <p class="coords__note">
+          Collectivités et établissements publics : nous répondons aux consultations et marchés
+          publics.
+        </p>
+      </aside>
+    </div>
+  </section>
 </BaseLayout>
+
+<style>
+  .contact {
+    display: grid;
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  @media (min-width: 60rem) {
+    .contact {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+
+  fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  fieldset:disabled {
+    opacity: 0.6;
+  }
+
+  .form__notice {
+    padding: var(--space-3) var(--space-4);
+    border-left: 3px solid var(--color-sand-500);
+    background: var(--color-sand-100);
+  }
+
+  .form__row {
+    display: grid;
+    gap: 0 var(--space-4);
+  }
+
+  @media (min-width: 40rem) {
+    .form__row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .field {
+    display: grid;
+    gap: var(--space-1);
+    margin-bottom: var(--space-4);
+  }
+
+  label {
+    font-weight: 600;
+    color: var(--color-navy-700);
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    padding: 0.7em 0.9em;
+    border: 1px solid var(--color-mist-300);
+    border-radius: var(--radius);
+    background: var(--color-white);
+    font: inherit;
+    color: var(--color-text);
+  }
+
+  input:focus-visible,
+  textarea:focus-visible {
+    border-color: var(--color-steel-600);
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  .field--trap {
+    position: absolute;
+    left: -9999px;
+  }
+
+  .form__required,
+  .form__rgpd {
+    font-size: var(--step--1);
+    color: var(--color-text-muted);
+  }
+
+  .form__rgpd {
+    margin-top: var(--space-4);
+  }
+
+  .coords {
+    padding: var(--space-5);
+    border-radius: var(--radius);
+    background: var(--color-navy-900);
+    color: var(--color-foam-100);
+  }
+
+  .coords h2 {
+    font-size: var(--step-2);
+    color: var(--color-white);
+  }
+
+  dl {
+    margin: 0 0 var(--space-4);
+  }
+
+  dt {
+    margin-top: var(--space-3);
+    font-size: var(--step--1);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-sand-500);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  .coords__note {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--color-mist-300);
+  }
+</style>
