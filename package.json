@@ -11,7 +11,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "photos": "node scripts/prepare-photos.mjs"
+    "photos": "node scripts/prepare-photos.mjs",
+    "check:images": "node scripts/check-images.mjs"
   },
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.3.0",

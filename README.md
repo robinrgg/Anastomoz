@@ -4,6 +4,7 @@ Site du bureau d'études Anastomoz (milieux aquatiques, poissons, pêche).
 
 - Prévisualisation : https://robinrgg.github.io/Anastomoz/
 - Choix techniques et checklist de mise en ligne : [ARCHITECTURE.md](ARCHITECTURE.md)
+- **Publier une actualité** : [docs/publier-une-actualite.md](docs/publier-une-actualite.md)
 
 ## Travailler en local (facultatif)
 

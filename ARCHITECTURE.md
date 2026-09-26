@@ -43,7 +43,7 @@ src/
     brand/               Logo
     photos/              Photos (déjà nettoyées de leurs métadonnées)
   components/            Éléments réutilisables (en-tête, pied de page…)
-  content/actualites/    Un fichier Markdown par actualité
+  content/actualites/    Un dossier par actualité (index.md + photo)
   content/references/    Un fichier Markdown par référence (voir modele.md)
   content.config.ts      Champs obligatoires des actualités et références
   data/site.ts           Nom, coordonnées, menu, affichage des prix
@@ -79,6 +79,7 @@ d'un domaine.
 | En-têtes HTTP (HSTS, anti-iframe, `nosniff`, `Permissions-Policy`…) | `deploy/`, à activer chez l'hébergeur définitif (GitHub Pages ne le permet pas) |
 | Non-indexation tant que le site n'est pas officiel | `SITE_INDEXABLE`, balise `noindex` et `robots.txt` |
 | Métadonnées des photos (GPS, appareil) supprimées **avant** l'ajout au dépôt | `npm run photos` |
+| Contrôle automatique : la construction échoue si une image contient des coordonnées GPS | `npm run check:images` |
 | Dépendances verrouillées (`package-lock.json`), audit à chaque construction | workflow |
 | Actions GitHub épinglées par empreinte (SHA), droits minimaux | workflow |
 | Aucun secret dans le dépôt | règle absolue, le dépôt est public |
@@ -114,7 +115,7 @@ Le dossier `photos-originales/` est ignoré par Git.
 1. [x] Socle technique : Astro, construction automatique, sécurité, pages légales modèles
 2. [x] Direction visuelle : maquette de la page d'accueil
 3. [x] Pages de contenu : Accueil, Prestations, Références, Équipe, Actualités, Contact (textes à valider)
-4. [ ] Actualités : notice de publication autonome
+4. [x] Actualités : notice de publication autonome ([docs/publier-une-actualite.md](docs/publier-une-actualite.md))
 5. [ ] Carte Hub'Eau
 6. [ ] Mise en ligne (voir ci-dessous)
 
