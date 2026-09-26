@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Liste provisoire, à valider et compléter.
+const prestations = [
+  'Inventaires piscicoles par pêche électrique',
+  'Suivis piscicoles des plans d’eau et retenues',
+  'Biométrie et analyse des peuplements',
+  'Continuité écologique et dispositifs de franchissement',
+  'Conseil en gestion piscicole et halieutique',
+];
+---
+
+<BaseLayout title="Prestations" description="Les prestations du bureau d’études Anastomoz.">
+  <div class="container prose">
+    <h1>Prestations</h1>
+    <ul>{prestations.map((p) => <li>{p}</li>)}</ul>
+    <p class="placeholder">Contenu provisoire : détail des prestations à rédiger.</p>
+  </div>
+</BaseLayout>

@@ -1,0 +1,50 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { url } from '../../lib/url';
+import { formatDate } from '../../lib/date';
+
+const articles = (await getCollection('actualites', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<BaseLayout title="Actualités" description="Les actualités du bureau d’études Anastomoz.">
+  <div class="container prose">
+    <h1>Actualités</h1>
+    {articles.length === 0 && <p>Aucune actualité pour le moment.</p>}
+    <ul class="articles">
+      {
+        articles.map((article) => (
+          <li>
+            <h2>
+              <a href={url(`/actualites/${article.id}/`)}>{article.data.title}</a>
+            </h2>
+            <p class="date">
+              <time datetime={article.data.date.toISOString()}>{formatDate(article.data.date)}</time>
+            </p>
+            <p>{article.data.description}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .articles {
+    padding: 0;
+    list-style: none;
+  }
+
+  .articles h2 {
+    margin-bottom: 0;
+    font-size: 1.375rem;
+  }
+
+  .date {
+    margin-top: var(--space-1);
+    color: var(--color-text-muted);
+    font-size: 0.9375rem;
+  }
+</style>

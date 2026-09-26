@@ -1,0 +1,59 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import hero from '../assets/photos/peche-electrique-epuisettes.jpg';
+import { site } from '../data/site';
+import { url } from '../lib/url';
+---
+
+<BaseLayout>
+  <section class="container hero">
+    <div>
+      <h1>{site.tagline}</h1>
+      <p>
+        Inventaires piscicoles, suivis de plans d’eau, continuité écologique et conseil en
+        gestion halieutique, au service des collectivités, des structures de pêche et des
+        acteurs privés.
+      </p>
+      <p><a href={url('/prestations/')}>Découvrir nos prestations</a></p>
+    </div>
+    <Image
+      src={hero}
+      alt="Trois intervenants en waders dans une rivière aux eaux claires, épuisettes en main, lors d’une pêche électrique."
+      widths={[480, 800, 1200]}
+      sizes="(min-width: 60rem) 50vw, 100vw"
+      loading="eager"
+      fetchpriority="high"
+    />
+  </section>
+
+  <section class="container">
+    <p class="placeholder">
+      Socle technique en place. La direction visuelle et les contenus définitifs arrivent aux
+      prochaines étapes.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+    padding-block: var(--space-5);
+  }
+
+  @media (min-width: 60rem) {
+    .hero {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .hero img {
+    border-radius: var(--radius);
+  }
+
+  h1 {
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+  }
+</style>

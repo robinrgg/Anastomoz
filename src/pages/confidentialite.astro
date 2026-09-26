@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+
+// Modèle à relire et compléter avant la mise en ligne (RGPD).
+---
+
+<BaseLayout
+  title="Politique de confidentialité"
+  description="Politique de confidentialité et de protection des données du site Anastomoz."
+>
+  <div class="container prose">
+    <h1>Politique de confidentialité</h1>
+
+    <h2>Responsable du traitement</h2>
+    <p>{site.name}, [adresse du siège], joignable à l’adresse {site.contact.email}.</p>
+
+    <h2>Données collectées</h2>
+    <p>
+      Le site ne collecte des données personnelles que lorsque vous utilisez le formulaire de
+      contact : nom, prénom, structure, adresse électronique, téléphone et contenu de votre
+      message.
+    </p>
+
+    <h2>Finalité et base légale</h2>
+    <p>
+      Ces données servent uniquement à répondre à votre demande et, le cas échéant, à établir
+      une proposition commerciale. Le traitement repose sur l’intérêt légitime de {site.name} à
+      répondre aux sollicitations qui lui sont adressées et sur les mesures précontractuelles
+      prises à votre demande.
+    </p>
+
+    <h2>Durée de conservation</h2>
+    <p>
+      Les données sont conservées au maximum trois ans à compter du dernier contact, puis
+      supprimées.
+    </p>
+
+    <h2>Destinataires et hébergement</h2>
+    <p>
+      Les données sont destinées exclusivement à {site.name}. Elles ne sont ni vendues ni cédées.
+      Elles sont hébergées au sein de l’Union européenne par [nom de l’hébergeur].
+    </p>
+
+    <h2>Cookies et mesure d’audience</h2>
+    <p>
+      Ce site ne dépose aucun cookie publicitaire ni de traceur tiers. [À compléter selon l’outil
+      de mesure d’audience retenu, configuré pour bénéficier de l’exemption de consentement de la
+      CNIL.]
+    </p>
+
+    <h2>Vos droits</h2>
+    <p>
+      Vous disposez d’un droit d’accès, de rectification, d’effacement, de limitation et
+      d’opposition au traitement de vos données. Pour les exercer, écrivez à
+      {site.contact.email}. Vous pouvez également introduire une réclamation auprès de la CNIL
+      (<a href="https://www.cnil.fr/">www.cnil.fr</a>).
+    </p>
+  </div>
+</BaseLayout>

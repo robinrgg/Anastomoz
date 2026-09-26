@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+import { url } from '../lib/url';
+
+// Modèle conforme à l'article 6 de la loi n° 2004-575 du 21 juin 2004 (LCEN).
+// Les éléments entre crochets sont à compléter après l'immatriculation.
+---
+
+<BaseLayout title="Mentions légales" description="Mentions légales du site Anastomoz.">
+  <div class="container prose">
+    <h1>Mentions légales</h1>
+
+    <h2>Éditeur du site</h2>
+    <p>
+      {site.name}, [forme juridique] au capital de [montant] €<br />
+      Siège social : [adresse complète]<br />
+      Immatriculée au RCS de [ville] sous le numéro [SIREN]<br />
+      SIRET : [numéro] — N° de TVA intracommunautaire : [numéro]<br />
+      Téléphone : {site.contact.phone} — Courriel : {site.contact.email}
+    </p>
+
+    <h2>Directeur de la publication</h2>
+    <p>[Prénom Nom], en qualité de [fonction].</p>
+
+    <h2>Hébergeur</h2>
+    <p>[Nom de l’hébergeur], [adresse], [téléphone].</p>
+
+    <h2>Propriété intellectuelle</h2>
+    <p>
+      L’ensemble des contenus de ce site (textes, photographies, logo, illustrations) est la
+      propriété de {site.name} ou de ses partenaires, sauf mention contraire. Toute reproduction
+      sans autorisation préalable est interdite.
+    </p>
+
+    <h2>Données personnelles</h2>
+    <p>
+      Le traitement des données personnelles est décrit dans la
+      <a href={url('/confidentialite/')}>politique de confidentialité</a>.
+    </p>
+  </div>
+</BaseLayout>

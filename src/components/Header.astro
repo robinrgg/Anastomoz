@@ -1,0 +1,80 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/brand/logo-temporaire.png';
+import { navigation, site } from '../data/site';
+import { url } from '../lib/url';
+
+const current = Astro.url.pathname;
+const isCurrent = (href: string) =>
+  href === '/' ? current === url('/') : current.startsWith(url(href));
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href={url('/')}>
+      <Image src={logo} alt="" width={56} height={56} densities={[1, 2]} loading="eager" />
+      <span>{site.name}</span>
+    </a>
+    <nav aria-label="Navigation principale">
+      <ul>
+        {
+          navigation.map((item) => (
+            <li>
+              <a href={url(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--color-foam);
+  }
+
+  .site-header__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-block: var(--space-3);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 1.375rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--color-navy);
+    text-decoration: none;
+    text-transform: lowercase;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  nav a {
+    color: var(--color-text);
+    text-decoration: none;
+    padding-block: var(--space-1);
+  }
+
+  nav a:hover,
+  nav a[aria-current='page'] {
+    color: var(--color-steel);
+    text-decoration: underline;
+  }
+</style>
