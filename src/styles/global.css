@@ -1,32 +1,49 @@
 /*
- * Styles de base — socle provisoire.
- * La direction visuelle définitive sera posée à l'étape « Design ».
- * Les couleurs sont tirées du logo temporaire.
+ * Styles globaux — direction visuelle « Anastomose ».
+ * Couleurs tirées du logo (bleus) + un ocre de banc de graviers en accent.
+ * Polices auto-hébergées (aucun appel à un service tiers).
  */
 
+@import '@fontsource-variable/fraunces/opsz.css';
+@import '@fontsource-variable/source-sans-3';
+
 :root {
-  --color-navy: #0c3558;
-  --color-navy-deep: #082640;
-  --color-steel: #306084;
-  --color-steel-light: #6c9cb4;
-  --color-mist: #a8b8c4;
-  --color-foam: #eef3f6;
+  /* Couleurs */
+  --color-navy-900: #082640;
+  --color-navy-700: #0c3558;
+  --color-steel-600: #306084;
+  --color-steel-400: #6c9cb4;
+  --color-mist-300: #a8b8c4;
+  --color-foam-100: #eef3f6;
+  --color-sand-500: #c8872e;
+  --color-sand-100: #f7f1e8;
   --color-white: #ffffff;
   --color-text: #13222f;
   --color-text-muted: #4a5a68;
 
-  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* Typographie */
+  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --font-body: 'Source Sans 3 Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --step--1: 0.9375rem;
+  --step-0: 1.125rem;
+  --step-1: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  --step-2: clamp(1.5rem, 1.2rem + 1.2vw, 2.125rem);
+  --step-3: clamp(2rem, 1.4rem + 2.4vw, 3.25rem);
+  --step-4: clamp(2.5rem, 1.6rem + 3.8vw, 4.5rem);
 
+  /* Espacements */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 1rem;
   --space-4: 1.5rem;
   --space-5: 2.5rem;
   --space-6: 4rem;
+  --space-7: clamp(4rem, 3rem + 5vw, 7.5rem);
 
-  --content-width: 72rem;
+  --content-width: 76rem;
   --prose-width: 42rem;
-  --radius: 0.5rem;
+  --radius: 0.375rem;
+  --shadow: 0 1px 2px rgb(8 38 64 / 0.06), 0 8px 24px rgb(8 38 64 / 0.08);
 }
 
 *,
@@ -37,52 +54,193 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 1.0625rem;
+  font-size: var(--step-0);
   line-height: 1.6;
   color: var(--color-text);
   background: var(--color-white);
+  text-rendering: optimizeLegibility;
 }
 
-img {
+img,
+svg {
   max-width: 100%;
   height: auto;
   display: block;
 }
 
 a {
-  color: var(--color-steel);
-  text-underline-offset: 0.15em;
+  color: var(--color-steel-600);
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
 }
 
 a:hover {
-  color: var(--color-navy);
+  color: var(--color-navy-700);
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-steel);
-  outline-offset: 2px;
+  outline: 3px solid var(--color-sand-500);
+  outline-offset: 3px;
 }
 
 h1,
 h2,
-h3 {
-  color: var(--color-navy);
-  line-height: 1.2;
+h3,
+h4 {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.12;
+  color: var(--color-navy-700);
+  text-wrap: balance;
 }
+
+h1 {
+  font-size: var(--step-4);
+}
+
+h2 {
+  font-size: var(--step-3);
+}
+
+h3 {
+  font-size: var(--step-1);
+  font-weight: 600;
+}
+
+p {
+  margin: 0 0 var(--space-3);
+  text-wrap: pretty;
+}
+
+/* ---------- Mise en page ---------- */
 
 .container {
   width: min(100% - 2rem, var(--content-width));
   margin-inline: auto;
 }
 
+.section {
+  padding-block: var(--space-7);
+}
+
+.section--sand {
+  background: var(--color-sand-100);
+}
+
+.section--navy {
+  background: var(--color-navy-900);
+  color: var(--color-foam-100);
+}
+
+.section--navy h2,
+.section--navy h3 {
+  color: var(--color-white);
+}
+
 .prose {
   max-width: var(--prose-width);
 }
+
+.prose h2 {
+  margin-top: var(--space-5);
+  font-size: var(--step-2);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-steel-600);
+}
+
+.eyebrow::before {
+  content: '';
+  width: 2rem;
+  height: 2px;
+  background: var(--color-sand-500);
+}
+
+.lead {
+  font-size: var(--step-1);
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Boutons ---------- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.8em 1.4em;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+}
+
+.button--primary {
+  background: var(--color-navy-700);
+  color: var(--color-white);
+}
+
+.button--primary:hover {
+  background: var(--color-navy-900);
+  color: var(--color-white);
+}
+
+.button--accent {
+  background: var(--color-sand-500);
+  color: var(--color-navy-900);
+}
+
+.button--accent:hover {
+  background: #d9994a;
+  color: var(--color-navy-900);
+}
+
+.button--ghost {
+  border-color: currentColor;
+  color: inherit;
+}
+
+.button--ghost:hover {
+  background: rgb(255 255 255 / 0.12);
+  color: inherit;
+}
+
+.link-arrow {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.link-arrow::after {
+  content: ' →';
+  transition: margin-left 0.2s;
+}
+
+.link-arrow:hover::after {
+  margin-left: 0.2em;
+}
+
+/* ---------- Utilitaires ---------- */
 
 .visually-hidden {
   position: absolute;
@@ -96,11 +254,11 @@ h3 {
 .skip-link {
   position: absolute;
   left: var(--space-3);
-  top: -3rem;
+  top: -4rem;
   padding: var(--space-2) var(--space-3);
-  background: var(--color-navy);
+  background: var(--color-navy-700);
   color: var(--color-white);
-  z-index: 10;
+  z-index: 100;
 }
 
 .skip-link:focus {
@@ -108,18 +266,31 @@ h3 {
 }
 
 .placeholder {
-  padding: var(--space-3);
-  border-left: 4px solid var(--color-mist);
-  background: var(--color-foam);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-sand-500);
+  background: var(--color-sand-100);
   color: var(--color-text-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
+}
+
+/* ---------- Pages intérieures ---------- */
+
+.page {
+  padding-block: var(--space-6) var(--space-7);
+}
+
+.page h1 {
+  font-size: var(--step-3);
 }

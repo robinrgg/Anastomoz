@@ -1,0 +1,72 @@
+---
+// Motif signature : des chenaux qui se séparent puis se rejoignent,
+// comme dans une rivière anastomosée. Purement décoratif.
+interface Props {
+  class?: string;
+  tone?: 'light' | 'dark';
+}
+
+const { class: className, tone = 'light' } = Astro.props;
+
+// Nœuds de confluence (x, y) reliés par plusieurs chenaux décalés.
+const nodes = [0, 300, 640, 930, 1200];
+const offsets = [-26, -9, 12, 30];
+
+const channels = offsets.map((offset, i) =>
+  nodes
+    .slice(1)
+    .map((x, n) => {
+      const prev = nodes[n];
+      const mid = (prev + x) / 2;
+      const dy = offset * (n % 2 === 0 ? 1 : -0.8);
+      return `C${prev + (mid - prev) * 0.6},${40 + dy} ${mid + (x - mid) * 0.4},${40 + dy} ${x},${40 + (i - 1.5) * 1.5}`;
+    })
+    .join(' '),
+);
+---
+
+<svg
+  class:list={['braids', `braids--${tone}`, className]}
+  viewBox="0 0 1200 80"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  {channels.map((d, i) => <path class={`c${i}`} d={`M0,${40 + (i - 1.5) * 1.5} ${d}`} />)}
+</svg>
+
+<style>
+  .braids {
+    width: 100%;
+    height: clamp(2.5rem, 5vw, 5rem);
+    fill: none;
+    stroke-linecap: round;
+  }
+
+  /* Pas d'attribut style en ligne : la CSP l'interdirait. */
+  path {
+    vector-effect: non-scaling-stroke;
+  }
+
+  .c0 { stroke-width: 1.2px; opacity: 0.45; }
+  .c1 { stroke-width: 1.8px; opacity: 0.6; }
+  .c2 { stroke-width: 2.4px; opacity: 0.75; }
+  .c3 { stroke-width: 3px; }
+
+  .braids--light path {
+    stroke: var(--color-steel-400);
+  }
+
+  .braids--light path:last-child {
+    stroke: var(--color-sand-500);
+  }
+
+  .braids--dark path {
+    stroke: var(--color-mist-300);
+  }
+
+  .braids--dark path:last-child {
+    stroke: var(--color-sand-500);
+    opacity: 0.9;
+  }
+</style>

@@ -1,4 +1,6 @@
 # Propose automatiquement les mises à jour de sécurité et de versions.
+# Les montées de version majeures (qui peuvent casser le site) ne sont pas
+# proposées automatiquement : on les fait volontairement, en vérifiant tout.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -8,6 +10,10 @@ updates:
     groups:
       dependances:
         patterns: ['*']
+        update-types: ['minor', 'patch']
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
   - package-ecosystem: github-actions
     directory: /
     schedule:

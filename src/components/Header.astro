@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import logo from '../assets/brand/logo-temporaire.png';
+import emblem from '../assets/brand/logo-embleme.png';
 import { navigation, site } from '../data/site';
 import { url } from '../lib/url';
 
@@ -12,28 +12,60 @@ const isCurrent = (href: string) =>
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href={url('/')}>
-      <Image src={logo} alt="" width={56} height={56} densities={[1, 2]} loading="eager" />
-      <span>{site.name}</span>
+      <Image src={emblem} alt="" width={48} height={48} densities={[1, 2]} loading="eager" />
+      <span>{site.name.toLowerCase()}</span>
     </a>
-    <nav aria-label="Navigation principale">
+
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-principal">
+      <span class="menu-toggle__bars" aria-hidden="true"></span>
+      <span>Menu</span>
+    </button>
+
+    <nav id="menu-principal" class="site-nav" aria-label="Navigation principale">
       <ul>
         {
-          navigation.map((item) => (
-            <li>
-              <a href={url(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>
-                {item.label}
-              </a>
-            </li>
-          ))
+          navigation
+            .filter((item) => item.href !== '/contact/')
+            .map((item) => (
+              <li>
+                <a href={url(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                  {item.label}
+                </a>
+              </li>
+            ))
         }
+        <li>
+          <a class="button button--primary" href={url('/contact/')} aria-current={isCurrent('/contact/') ? 'page' : undefined}>
+            Contact
+          </a>
+        </li>
       </ul>
     </nav>
   </div>
 </header>
 
+<script>
+  // Menu mobile : seul script du site. Sans JavaScript, le menu reste affiché.
+  const toggle = document.querySelector<HTMLButtonElement>('.menu-toggle');
+  const nav = document.getElementById('menu-principal');
+  if (toggle && nav) {
+    document.documentElement.classList.add('js');
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!open));
+      nav.classList.toggle('is-open', !open);
+    });
+  }
+</script>
+
 <style>
   .site-header {
-    border-bottom: 1px solid var(--color-foam);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgb(255 255 255 / 0.96);
+    border-bottom: 1px solid var(--color-foam-100);
+    backdrop-filter: blur(8px);
   }
 
   .site-header__inner {
@@ -41,40 +73,148 @@ const isCurrent = (href: string) =>
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-3);
-    padding-block: var(--space-3);
+    gap: var(--space-2) var(--space-4);
+    padding-block: var(--space-2);
   }
 
   .brand {
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    font-size: 1.375rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    color: var(--color-navy);
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--color-navy-700);
     text-decoration: none;
-    text-transform: lowercase;
   }
 
-  ul {
+  .site-nav ul {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-1) var(--space-3);
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  nav a {
+  .site-nav a:not(.button) {
+    position: relative;
+    padding-block: var(--space-2);
+    font-weight: 500;
     color: var(--color-text);
     text-decoration: none;
-    padding-block: var(--space-1);
   }
 
-  nav a:hover,
-  nav a[aria-current='page'] {
-    color: var(--color-steel);
-    text-decoration: underline;
+  .site-nav a:not(.button)::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.1rem;
+    height: 2px;
+    background: var(--color-sand-500);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s;
+  }
+
+  .site-nav a:not(.button):hover::after,
+  .site-nav a[aria-current='page']:not(.button)::after {
+    transform: scaleX(1);
+  }
+
+  .site-nav .button {
+    padding: 0.55em 1.2em;
+  }
+
+  .menu-toggle {
+    display: none;
+  }
+
+  @media (max-width: 56rem) {
+    :global(.js) .menu-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      border: 1px solid var(--color-mist-300);
+      border-radius: 999px;
+      background: none;
+      font: inherit;
+      font-weight: 600;
+      color: var(--color-navy-700);
+      cursor: pointer;
+    }
+
+    .menu-toggle__bars,
+    .menu-toggle__bars::before,
+    .menu-toggle__bars::after {
+      display: block;
+      width: 1.1rem;
+      height: 2px;
+      background: currentColor;
+      transition: transform 0.2s;
+    }
+
+    .menu-toggle__bars {
+      position: relative;
+    }
+
+    .menu-toggle__bars::before,
+    .menu-toggle__bars::after {
+      content: '';
+      position: absolute;
+      left: 0;
+    }
+
+    .menu-toggle__bars::before {
+      top: -6px;
+    }
+
+    .menu-toggle__bars::after {
+      top: 6px;
+    }
+
+    .menu-toggle[aria-expanded='true'] .menu-toggle__bars {
+      background: transparent;
+    }
+
+    .menu-toggle[aria-expanded='true'] .menu-toggle__bars::before {
+      transform: translateY(6px) rotate(45deg);
+    }
+
+    .menu-toggle[aria-expanded='true'] .menu-toggle__bars::after {
+      transform: translateY(-6px) rotate(-45deg);
+    }
+
+    .site-nav {
+      flex-basis: 100%;
+    }
+
+    :global(.js) .site-nav:not(.is-open) {
+      display: none;
+    }
+
+    .site-nav ul {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0;
+      padding-bottom: var(--space-3);
+    }
+
+    .site-nav li {
+      width: 100%;
+      border-top: 1px solid var(--color-foam-100);
+    }
+
+    .site-nav a:not(.button) {
+      display: block;
+      padding-block: var(--space-3);
+    }
+
+    .site-nav li:last-child {
+      padding-top: var(--space-3);
+    }
   }
 </style>

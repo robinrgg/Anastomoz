@@ -25,6 +25,7 @@ Il est à mettre à jour à chaque décision structurante.
 | Contenus éditoriaux | Fichiers Markdown (`src/content/actualites/`) | Modifiables directement dans l'interface web de GitHub |
 | Hébergement (prévisualisation) | GitHub Pages | Gratuit, publication automatique |
 | Hébergement (définitif) | Hébergeur européen, à choisir | Souveraineté des données, attentes des clients publics |
+| Polices | Fraunces (titres) et Source Sans 3 (texte), via Fontsource | Libres, servies par le site lui-même : aucun appel à Google Fonts |
 | Intégration continue | GitHub Actions | Vérifie, construit et publie à chaque modification |
 
 ## Organisation des fichiers
@@ -107,7 +108,7 @@ Le dossier `photos-originales/` est ignoré par Git.
 ## Plan de travail
 
 1. [x] Socle technique : Astro, construction automatique, sécurité, pages légales modèles
-2. [ ] Direction visuelle : maquette de la page d'accueil
+2. [ ] Direction visuelle : maquette de la page d'accueil (proposée, en attente de validation)
 3. [ ] Pages de contenu : Accueil, Prestations, Références, Équipe, Actualités, Contact
 4. [ ] Actualités : notice de publication autonome
 5. [ ] Carte Hub'Eau

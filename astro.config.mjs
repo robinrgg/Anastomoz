@@ -13,6 +13,9 @@ export default defineConfig({
   base,
   trailingSlash: 'always',
   build: { format: 'directory' },
+  // Pas de coloration de code dans les actualités : Shiki utilise des styles
+  // en ligne incompatibles avec la CSP.
+  markdown: { syntaxHighlight: false },
   env: {
     schema: {
       // Passer à true le jour de la mise en ligne définitive : tant que c'est

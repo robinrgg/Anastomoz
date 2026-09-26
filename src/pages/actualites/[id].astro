@@ -16,7 +16,7 @@ const { title, description, date, image, imageAlt } = article.data;
 ---
 
 <BaseLayout title={title} description={description} ogImage={image?.src}>
-  <article class="container prose">
+  <article class="container prose page">
     <p><a href={url('/actualites/')}>← Toutes les actualités</a></p>
     <h1>{title}</h1>
     <p class="date"><time datetime={date.toISOString()}>{formatDate(date)}</time></p>
