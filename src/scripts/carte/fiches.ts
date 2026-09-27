@@ -1,5 +1,4 @@
 import type { StationHydro, StationPoisson } from './donnees';
-import { situationHydro } from './couleurs';
 import { capitalize, formatDate, formatDebit, formatHour, h } from './dom';
 import { graphiqueDebits } from './graphique';
 
@@ -193,7 +192,6 @@ export function ficheHydro(station: StationHydro, signal: AbortSignal): HTMLElem
       const libelleActuel = 'instantane' in actuel
         ? `Débit instantané (${formatHour(actuel.date)})`
         : `Débit du ${formatDate(actuel.date)}`;
-      const situation = situationHydro(actuel.valeur, station);
       const annees = station.annees ? ` (${station.annees} ans)` : '';
       const serie = 'instantane' in actuel && actuel.date.slice(0, 10) !== dernierJour?.date.slice(0, 10)
         ? [...points, { ...actuel }]
@@ -207,11 +205,9 @@ export function ficheHydro(station: StationHydro, signal: AbortSignal): HTMLElem
           tuile(formatDebit(station.qmna5), 'QMNA5'),
         ),
       ];
-      if (situation) blocs.push(h('p', { class: `situation situation--${situation.cle}` }, situation.libelle));
       blocs.push(
         h('h3', { class: 'fiche__section' }, 'Débit moyen journalier — 14 derniers jours'),
         serie.length > 1 ? graphiqueDebits(serie, station) : h('p', { class: 'fiche__note' }, 'Série trop courte pour tracer un graphique.'),
-        h('p', { class: 'fiche__note' }, 'Débits en m³/s. Module, Q25 et QMNA5 calculés sur la chronique complète de la station.'),
       );
       contenu.replaceChildren(...blocs);
     })

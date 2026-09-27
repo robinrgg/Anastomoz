@@ -4,7 +4,6 @@ import './carte.css';
 import { chargerHydro, chargerPoissons, type StationHydro, type StationPoisson } from './donnees';
 import { COULEUR_HYDRO, couleurIpr } from './couleurs';
 import { ficheHydro, fichePoisson } from './fiches';
-import { formatDate } from './dom';
 
 // Carte interactive : fonds IGN, couche « Poissons » (IPR) et couche « Débits ».
 
@@ -133,10 +132,10 @@ if (conteneur && panneau && panneauContenu && boutonFermer && etat) {
       const m = L.circleMarker([s.lat, s.lon], {
         renderer: rendu,
         radius: rayon(),
-        weight: 1.5,
-        color: COULEUR_HYDRO,
-        fillColor: '#ffffff',
-        fillOpacity: 1,
+        weight: 1,
+        color: '#ffffff',
+        fillColor: COULEUR_HYDRO,
+        fillOpacity: 0.95,
       });
       m.bindTooltip(s.nom, { direction: 'top', offset: [0, -6] });
       m.on('click', () => ouvrirFiche(m, (signal) => ficheHydro(s, signal)));
@@ -160,20 +159,13 @@ if (conteneur && panneau && panneauContenu && boutonFermer && etat) {
   }
 
   // ---------------------------------------------------------------- Chargement
+  // La légende n'affiche un message que pendant le chargement ou en cas d'erreur.
   Promise.allSettled([chargerPoissons(), chargerHydro()]).then(([poissons, hydro]) => {
-    const messages: string[] = [];
+    const erreurs: string[] = [];
     if (hydro.status === 'fulfilled') ajouterHydro(hydro.value.stations);
-    if (poissons.status === 'fulfilled') {
-      ajouterPoissons(poissons.value.stations);
-      messages.push(`${poissons.value.stations.length.toLocaleString('fr-FR')} stations piscicoles (mises à jour le ${formatDate(poissons.value.genere)})`);
-    } else {
-      messages.push('Stations piscicoles indisponibles');
-    }
-    if (hydro.status === 'fulfilled') {
-      messages.push(`${hydro.value.stations.length.toLocaleString('fr-FR')} stations hydrométriques actives`);
-    } else {
-      messages.push('Stations hydrométriques indisponibles');
-    }
-    etat.textContent = messages.join(' · ') + '.';
+    else erreurs.push('Stations hydrométriques indisponibles.');
+    if (poissons.status === 'fulfilled') ajouterPoissons(poissons.value.stations);
+    else erreurs.push('Stations piscicoles indisponibles.');
+    etat.textContent = erreurs.join(' ');
   });
 }

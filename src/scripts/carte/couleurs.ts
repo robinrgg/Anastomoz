@@ -10,17 +10,8 @@ export const CLASSES_IPR = [
 ] as const;
 
 export const COULEUR_SANS_IPR = '#8a99a6';
-export const COULEUR_HYDRO = '#0c3558';
+/** Stations hydrométriques : bleu « eau » soutenu, bien visible sur les deux fonds. */
+export const COULEUR_HYDRO = '#1565c0';
 
 export const couleurIpr = (classe: number | null) =>
   CLASSES_IPR.find((c) => c.code === classe)?.couleur ?? COULEUR_SANS_IPR;
-
-/** Situation hydrologique d'un débit par rapport aux débits caractéristiques. */
-export function situationHydro(debit: number | null, ref: { module: number | null; q25: number | null; qmna5: number | null }) {
-  if (debit === null) return null;
-  if (ref.qmna5 !== null && debit <= ref.qmna5) return { cle: 'etiage', libelle: 'Étiage sévère (≤ QMNA5)' };
-  if (ref.q25 !== null && debit <= ref.q25) return { cle: 'basses', libelle: 'Basses eaux (≤ Q25)' };
-  if (ref.module !== null && debit <= ref.module) return { cle: 'moyennes', libelle: 'Eaux moyennes (≤ module)' };
-  if (ref.module !== null) return { cle: 'hautes', libelle: 'Hautes eaux (> module)' };
-  return null;
-}

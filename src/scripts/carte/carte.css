@@ -109,6 +109,10 @@
   color: var(--color-text-muted);
 }
 
+.legende__etat:empty {
+  display: none;
+}
+
 .pastille {
   display: inline-block;
   flex: none;
@@ -127,9 +131,7 @@
 .pastille--ipr-null { background: var(--ipr-null); }
 
 .pastille--hydro {
-  background: var(--color-white);
-  border: 2.5px solid var(--color-navy-700);
-  box-shadow: none;
+  background: #1565c0; /* identique à COULEUR_HYDRO (couleurs.ts) */
 }
 
 /* ---------- Panneau de fiche ---------- */
@@ -346,20 +348,6 @@
 .tuile--actuel .tuile__libelle {
   color: var(--color-mist-300);
 }
-
-.situation {
-  display: inline-block;
-  margin: var(--space-3) 0 0;
-  padding: 0.25em 0.8em;
-  border-radius: 999px;
-  font-size: var(--step--1);
-  font-weight: 600;
-}
-
-.situation--etiage { background: #fbe3d6; color: #8a3413; }
-.situation--basses { background: var(--color-sand-100); color: var(--color-sand-700); }
-.situation--moyennes { background: var(--color-foam-100); color: var(--color-steel-600); }
-.situation--hautes { background: #dce8f5; color: var(--color-navy-700); }
 
 /* Graphique */
 .graph {
