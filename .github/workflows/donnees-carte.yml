@@ -2,7 +2,7 @@
 # le site. Aucune action manuelle n'est nécessaire.
 #
 #  - Stations piscicoles (IPR) : le 1er de chaque mois.
-#  - Stations hydrométriques actives : chaque lundi.
+#  - Stations hydrométriques actives : chaque jour.
 #
 # Lancement manuel possible : onglet Actions → « Données de la carte » → Run workflow.
 
@@ -11,7 +11,7 @@ name: Données de la carte
 on:
   schedule:
     - cron: '43 2 1 * *' # poissons
-    - cron: '17 3 * * 1' # débits
+    - cron: '17 3 * * *' # débits
   workflow_dispatch:
     inputs:
       couche:
@@ -51,7 +51,7 @@ jobs:
         run: node scripts/data/poissons.mjs
 
       - name: Stations hydrométriques
-        if: github.event.schedule == '17 3 * * 1' || inputs.couche == 'toutes' || inputs.couche == 'hydrometrie'
+        if: github.event.schedule == '17 3 * * *' || inputs.couche == 'toutes' || inputs.couche == 'hydrometrie'
         run: node scripts/data/hydrometrie.mjs
 
       - name: Enregistrement des données

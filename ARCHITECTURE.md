@@ -124,7 +124,7 @@ estompage du relief en mode produit, réseau hydrographique par-dessus ; effets 
 | **Débits** | Stations en service ayant publié un débit sur les 15 derniers jours, avec module, Q25 et QMNA5 (`data/stations_debits.csv`) | Débit instantané et débits journaliers des 14 derniers jours |
 
 **Actualisation** : le workflow `donnees-carte.yml` régénère `public/data/carte/*.json`
-(poissons le 1er du mois, débits chaque lundi), les enregistre dans le dépôt puis
+(poissons le 1er du mois, débits chaque jour), les enregistre dans le dépôt puis
 relance la publication. Lancement manuel : onglet Actions → « Données de la carte ».
 Les scripts refusent d'écrire un fichier anormalement petit (panne de l'API) : la
 carte garde alors les données précédentes.
