@@ -1,4 +1,4 @@
-import { formatDebit, formatShortDate } from './dom';
+import { formatDate, formatDebit, formatHour, formatShortDate } from './dom';
 
 // Graphique SVG des débits récents avec les débits caractéristiques en pointillés.
 // Dessiné à la main (aucune bibliothèque) ; les styles sont dans la page (CSP).
@@ -80,5 +80,88 @@ export function graphiqueDebits(points: Point[], seuils: Seuils): SVGSVGElement 
     });
   }
 
+  if (points.length > 0) ajouterInfobulle(svg, points, x, y);
+
   return svg;
+}
+
+/**
+ * Infobulle au survol (souris, doigt ou flèches du clavier) : repère vertical,
+ * point mis en évidence, date et débit du point le plus proche.
+ */
+function ajouterInfobulle(svg: SVGSVGElement, points: Point[], x: (i: number) => number, y: (v: number) => number) {
+  const groupe = el('g', { class: 'graph__hover', visibility: 'hidden', 'aria-hidden': 'true' });
+  const repere = el('line', { y1: M.top, y2: H - M.bottom, class: 'graph__hover-line' });
+  const pastille = el('circle', { r: 5, class: 'graph__hover-point' });
+  const fond = el('rect', { rx: 4, height: 34, class: 'graph__hover-bg' });
+  const ligneDebit = el('text', { class: 'graph__hover-value' });
+  const ligneDate = el('text', { class: 'graph__hover-date' });
+  groupe.append(repere, pastille, fond, ligneDebit, ligneDate);
+
+  // Zone de capture invisible couvrant tout le graphique.
+  const capture = el('rect', { x: 0, y: 0, width: W, height: H, class: 'graph__capture' });
+  svg.append(groupe, capture);
+
+  let courant = -1;
+  function afficher(i: number) {
+    courant = i;
+    const p = points[i];
+    const px = x(i);
+    const py = y(p.valeur);
+    repere.setAttribute('x1', String(px));
+    repere.setAttribute('x2', String(px));
+    pastille.setAttribute('cx', String(px));
+    pastille.setAttribute('cy', String(py));
+    ligneDebit.textContent = `${formatDebit(p.valeur)} m³/s`;
+    ligneDate.textContent = p.instantane ? `Instantané · ${formatHour(p.date)}` : formatDate(p.date);
+    groupe.setAttribute('visibility', 'visible');
+
+    // Bulle à droite du point, ou à gauche près du bord ; au-dessus, ou en dessous près du haut.
+    const largeur = Math.max(ligneDebit.getComputedTextLength(), ligneDate.getComputedTextLength()) + 16;
+    const bx = px + 10 + largeur > W - 2 ? px - 10 - largeur : px + 10;
+    const by = py - 42 < 2 ? py + 8 : py - 42;
+    fond.setAttribute('x', String(bx));
+    fond.setAttribute('y', String(by));
+    fond.setAttribute('width', String(largeur));
+    ligneDebit.setAttribute('x', String(bx + 8));
+    ligneDebit.setAttribute('y', String(by + 14));
+    ligneDate.setAttribute('x', String(bx + 8));
+    ligneDate.setAttribute('y', String(by + 27));
+    svg.setAttribute('aria-label', `${ligneDebit.textContent}, ${ligneDate.textContent}`);
+  }
+
+  function masquer() {
+    courant = -1;
+    groupe.setAttribute('visibility', 'hidden');
+  }
+
+  function indexProche(evenement: PointerEvent) {
+    const matrice = svg.getScreenCTM();
+    if (!matrice) return -1;
+    const pt = new DOMPoint(evenement.clientX, evenement.clientY).matrixTransform(matrice.inverse());
+    let meilleur = 0;
+    for (let i = 1; i < points.length; i++) if (Math.abs(x(i) - pt.x) < Math.abs(x(meilleur) - pt.x)) meilleur = i;
+    return meilleur;
+  }
+
+  capture.addEventListener('pointermove', (e) => {
+    const i = indexProche(e);
+    if (i >= 0 && i !== courant) afficher(i);
+  });
+  capture.addEventListener('pointerdown', (e) => {
+    const i = indexProche(e);
+    if (i >= 0) afficher(i);
+  });
+  capture.addEventListener('pointerleave', masquer);
+
+  // Clavier : le graphique est focalisable, les flèches parcourent les points.
+  svg.setAttribute('tabindex', '0');
+  svg.addEventListener('focus', () => afficher(points.length - 1));
+  svg.addEventListener('blur', masquer);
+  svg.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    const pas = e.key === 'ArrowLeft' ? -1 : 1;
+    afficher(Math.min(points.length - 1, Math.max(0, (courant < 0 ? points.length - 1 : courant) + pas)));
+  });
 }

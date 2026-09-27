@@ -385,6 +385,44 @@
   fill: var(--color-steel-600);
 }
 
+.graph__capture {
+  fill: transparent;
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+
+.graph__hover-line {
+  stroke: var(--color-mist-300);
+  stroke-width: 1;
+}
+
+.graph__hover-point {
+  fill: var(--color-white);
+  stroke: var(--color-steel-600);
+  stroke-width: 2.5;
+}
+
+.graph__hover-bg {
+  fill: var(--color-navy-900);
+  opacity: 0.94;
+}
+
+.graph__hover-value,
+.graph__hover-date {
+  font-family: var(--font-body);
+  fill: var(--color-white);
+}
+
+.graph__hover-value {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.graph__hover-date {
+  font-size: 9.5px;
+  fill: var(--color-mist-300);
+}
+
 .graph__point--now {
   fill: var(--color-sand-500);
   stroke: var(--color-white);
