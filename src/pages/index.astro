@@ -160,12 +160,14 @@ const actualites = (await getCollection('actualites', ({ data }) => !data.draft)
   <section class="section">
     <div class="container donnees">
       <div>
-        <p class="eyebrow">Données ouvertes</p>
-        <h2>Les rivières en chiffres</h2>
+        <p class="eyebrow">Carte interactive</p>
+        <h2>Les rivières en données</h2>
         <p class="lead">
-          Bientôt sur ce site : une carte interactive des données piscicoles et de qualité des
-          eaux publiées par les services publics via Hub’Eau.
+          Plus de 5 000 stations piscicoles avec leur indice poisson rivière, et les débits de
+          plus de 2 000 stations hydrométriques en temps réel, à partir des données publiques
+          Hub’Eau.
         </p>
+        <a class="button button--primary" href={url('/carte/')}>Explorer la carte</a>
       </div>
       <Braids class="donnees__braids" />
     </div>

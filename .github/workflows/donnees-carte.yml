@@ -1,0 +1,78 @@
+# Met à jour automatiquement les données de la carte interactive, puis republie
+# le site. Aucune action manuelle n'est nécessaire.
+#
+#  - Stations piscicoles (IPR) : le 1er de chaque mois.
+#  - Stations hydrométriques actives : chaque lundi.
+#
+# Lancement manuel possible : onglet Actions → « Données de la carte » → Run workflow.
+
+name: Données de la carte
+
+on:
+  schedule:
+    - cron: '43 2 1 * *' # poissons
+    - cron: '17 3 * * 1' # débits
+  workflow_dispatch:
+    inputs:
+      couche:
+        description: Données à actualiser
+        type: choice
+        options: [toutes, poissons, hydrometrie]
+        default: toutes
+
+permissions:
+  contents: read
+
+concurrency:
+  group: donnees-carte
+  cancel-in-progress: false
+
+jobs:
+  actualiser:
+    name: Actualisation depuis Hub'Eau
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write # enregistrer les nouveaux fichiers de données
+      actions: write # relancer la publication du site
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      # Les scripts n'utilisent que Node.js lui-même : aucune dépendance installée
+      # dans ce job, qui dispose de droits d'écriture.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Stations piscicoles
+        if: github.event.schedule == '43 2 1 * *' || inputs.couche == 'toutes' || inputs.couche == 'poissons'
+        run: node scripts/data/poissons.mjs
+
+      - name: Stations hydrométriques
+        if: github.event.schedule == '17 3 * * 1' || inputs.couche == 'toutes' || inputs.couche == 'hydrometrie'
+        run: node scripts/data/hydrometrie.mjs
+
+      - name: Enregistrement des données
+        id: commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/data/carte
+          if git diff --cached --quiet; then
+            echo "Aucune modification."
+            echo "modifie=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Données de la carte : actualisation automatique"
+            git push
+            echo "modifie=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Un envoi fait par ce workflow ne déclenche pas les autres workflows :
+      # on relance donc explicitement la publication.
+      - name: Publication du site
+        if: steps.commit.outputs.modifie == 'true'
+        run: gh workflow run deploy.yml --ref "${{ github.event.repository.default_branch }}"
+        env:
+          GH_TOKEN: ${{ github.token }}

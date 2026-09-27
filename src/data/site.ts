@@ -25,6 +25,7 @@ export const navigation = [
   { href: '/prestations/', label: 'Prestations' },
   { href: '/references/', label: 'Références' },
   { href: '/equipe/', label: 'Équipe' },
+  { href: '/carte/', label: 'Carte interactive' },
   { href: '/actualites/', label: 'Actualités' },
   { href: '/contact/', label: 'Contact' },
 ] as const;

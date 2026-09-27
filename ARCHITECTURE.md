@@ -25,6 +25,7 @@ Il est à mettre à jour à chaque décision structurante.
 | Contenus éditoriaux | Fichiers Markdown (`src/content/actualites/`) | Modifiables directement dans l'interface web de GitHub |
 | Hébergement (prévisualisation) | GitHub Pages | Gratuit, publication automatique |
 | Hébergement (définitif) | Hébergeur européen, à choisir | Souveraineté des données, attentes des clients publics |
+| Carte | Leaflet (npm), fonds IGN Géoplateforme, données Hub'Eau | Léger, libre, servi par le site ; données publiques françaises |
 | Polices | Fraunces (titres) et Source Sans 3 (texte), via Fontsource | Libres, servies par le site lui-même : aucun appel à Google Fonts |
 | Intégration continue | GitHub Actions | Vérifie, construit et publie à chaque modification |
 
@@ -33,11 +34,16 @@ Il est à mettre à jour à chaque décision structurante.
 ```
 .github/
   workflows/deploy.yml   Construction et publication automatiques
+  workflows/donnees-carte.yml  Actualisation automatique des données de la carte
   dependabot.yml         Alertes et mises à jour de sécurité
 deploy/                  En-têtes de sécurité pour l'hébergeur définitif
+data/stations_debits.csv Débits de référence (module, Q25, QMNA5) par station
 public/                  Fichiers copiés tels quels (icônes)
+  data/carte/            Stations de la carte (générées, ne pas modifier à la main)
 scripts/
   prepare-photos.mjs     Nettoyage des photos avant ajout au dépôt
+  check-images.mjs       Contrôle : aucune coordonnée GPS dans les images
+  data/                  Préparation des données de la carte depuis Hub'Eau
 src/
   assets/                Images optimisées automatiquement à la construction
     brand/               Logo
@@ -52,6 +58,7 @@ src/
   layouts/               Gabarit commun à toutes les pages
   lib/                   Petites fonctions utilitaires
   pages/                 Une page = un fichier (l'adresse suit le nom du fichier)
+  scripts/carte/         Code de la carte interactive (navigateur)
   styles/global.css      Couleurs, espacements et styles de base
 astro.config.mjs         Configuration : adresse du site, sécurité
 ```
@@ -82,6 +89,7 @@ d'un domaine.
 | Contrôle automatique : la construction échoue si une image contient des coordonnées GPS | `npm run check:images` |
 | Dépendances verrouillées (`package-lock.json`), audit à chaque construction | workflow |
 | Actions GitHub épinglées par empreinte (SHA), droits minimaux | workflow |
+| Exceptions CSP limitées à la carte (IGN, Hub'Eau) | `src/pages/carte.astro` |
 | Aucun secret dans le dépôt | règle absolue, le dépôt est public |
 | Double authentification sur le compte GitHub | activée |
 
@@ -103,12 +111,30 @@ Le dossier `photos-originales/` est ignoré par Git.
   en France, sans service tiers). Anti-spam sans Google : champ piège, contrôle
   de délai, [ALTCHA](https://altcha.org) si nécessaire.
 
-## Carte interactive (à venir)
+## Carte interactive
 
-- Données : API [Hub'Eau](https://hubeau.eaufrance.fr) (poissons, qualité, température, hydrométrie).
-- Fonds de carte : IGN Géoplateforme.
-- Bibliothèque : Leaflet, chargée uniquement sur la page de la carte.
-- À vérifier au moment du développement : accès des API depuis le navigateur (CORS).
+Page `/carte/`. Deux couches, sur fonds IGN (plan ou photographies aériennes) :
+
+| Couche | Préparé à l'avance (GitHub Actions) | Interrogé en direct au clic |
+|---|---|---|
+| **Poissons** | Dernière pêche de chaque station : note et classe IPR, date, protocole (API État piscicole). Corse : dernière pêche, IPR non applicable. | Espèces capturées lors de cette pêche |
+| **Débits** | Stations en service ayant publié un débit sur les 15 derniers jours, avec module, Q25 et QMNA5 (`data/stations_debits.csv`) | Débit instantané et débits journaliers des 14 derniers jours |
+
+**Actualisation** : le workflow `donnees-carte.yml` régénère `public/data/carte/*.json`
+(poissons le 1er du mois, débits chaque lundi), les enregistre dans le dépôt puis
+relance la publication. Lancement manuel : onglet Actions → « Données de la carte ».
+Les scripts refusent d'écrire un fichier anormalement petit (panne de l'API) : la
+carte garde alors les données précédentes.
+
+**Sécurité** : exceptions à la CSP limitées à la page de la carte
+(`Astro.csp.insertDirective`) : `img-src https://data.geopf.fr` (tuiles IGN) et
+`connect-src https://hubeau.eaufrance.fr` (données en direct). Les textes venant des
+API sont insérés comme texte, jamais comme HTML. Leaflet est installé via npm et servi
+par le site (aucun CDN). Graphique des débits dessiné en SVG, sans bibliothèque.
+
+**Débits de référence** : `data/stations_debits.csv` provient de l'application
+Bilan hydro-météo (dépôt `turbo-app`). Pour le mettre à jour, remplacer le fichier
+puis lancer le workflow « Données de la carte ».
 
 ## Plan de travail
 
@@ -116,7 +142,7 @@ Le dossier `photos-originales/` est ignoré par Git.
 2. [x] Direction visuelle : maquette de la page d'accueil
 3. [x] Pages de contenu : Accueil, Prestations, Références, Équipe, Actualités, Contact (textes à valider)
 4. [x] Actualités : notice de publication autonome ([docs/publier-une-actualite.md](docs/publier-une-actualite.md))
-5. [ ] Carte Hub'Eau
+5. [x] Carte interactive Hub'Eau (poissons et débits)
 6. [ ] Mise en ligne (voir ci-dessous)
 
 ## Checklist de mise en ligne

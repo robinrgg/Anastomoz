@@ -1,0 +1,147 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { CLASSES_IPR } from '../scripts/carte/couleurs';
+
+// Exceptions à la politique de sécurité, limitées à cette page :
+//  - tuiles du fond de carte IGN (Géoplateforme) ;
+//  - requêtes en direct vers Hub'Eau (espèces capturées, débits en temps réel).
+if (!Astro.csp) throw new Error('La CSP doit être activée (astro.config.mjs).');
+Astro.csp.insertDirective("img-src 'self' data: https://data.geopf.fr");
+Astro.csp.insertDirective("connect-src 'self' https://hubeau.eaufrance.fr");
+---
+
+<BaseLayout
+  title="Carte interactive"
+  description="Carte interactive des stations piscicoles (indice poisson rivière) et des débits des cours d’eau en temps réel, en France métropolitaine et en Corse."
+>
+  <div class="container carte-intro">
+    <p class="eyebrow">Carte interactive</p>
+    <h1>Les rivières en données</h1>
+    <p class="lead">
+      État des peuplements de poissons et débits en temps réel, à partir des données publiques
+      Hub’Eau. Cliquez sur une station pour afficher sa fiche.
+    </p>
+  </div>
+
+  <div class="carte-wrap">
+    <div id="carte" class="carte" tabindex="0" role="region" aria-label="Carte des stations piscicoles et hydrométriques"></div>
+
+    <div class="legende">
+      <fieldset>
+        <legend class="legende__titre">Couches</legend>
+
+        <label class="legende__couche">
+          <input type="checkbox" id="couche-poissons" checked />
+          <span>Poissons — indice poisson rivière (IPR)</span>
+        </label>
+        <ul class="legende__classes">
+          {
+            CLASSES_IPR.map((c) => (
+              <li>
+                <span class={`pastille pastille--ipr-${c.code}`} aria-hidden="true" />
+                {c.libelle}
+              </li>
+            ))
+          }
+          <li><span class="pastille pastille--ipr-null" aria-hidden="true"></span>Sans IPR (Corse)</li>
+        </ul>
+
+        <label class="legende__couche">
+          <input type="checkbox" id="couche-hydro" checked />
+          <span><span class="pastille pastille--hydro" aria-hidden="true"></span>Débits en temps réel</span>
+        </label>
+      </fieldset>
+      <p id="carte-etat" class="legende__etat" role="status">Chargement des stations…</p>
+    </div>
+
+    <aside id="fiche" class="fiche-panneau" hidden aria-label="Fiche de la station sélectionnée">
+      <button id="fiche-fermer" class="fiche-panneau__fermer" type="button">
+        Fermer <span aria-hidden="true">×</span>
+      </button>
+      <div id="fiche-contenu"></div>
+    </aside>
+
+    <noscript>
+      <p class="carte-noscript">La carte interactive nécessite JavaScript.</p>
+    </noscript>
+  </div>
+
+  <section class="container carte-notes">
+    <h2>À propos des données</h2>
+    <div class="carte-notes__grille">
+      <div>
+        <h3>Poissons</h3>
+        <p>
+          Dernière pêche scientifique de chaque station du réseau national (Office français de la
+          biodiversité). L’<strong>indice poisson rivière (IPR)</strong> compare le peuplement observé
+          à celui attendu sans perturbation : plus la note est basse, meilleur est l’état. Il n’est
+          pas calculé en Corse. Liste des stations actualisée chaque mois.
+        </p>
+      </div>
+      <div>
+        <h3>Débits</h3>
+        <p>
+          Stations hydrométriques ayant transmis un débit au cours des quinze derniers jours. Les
+          débits sont interrogés en temps réel à l’ouverture de la fiche ; ce sont des données
+          brutes, susceptibles d’être corrigées. Le module, le Q25 et le QMNA5 sont calculés sur
+          l’ensemble de la chronique de chaque station.
+        </p>
+      </div>
+      <div>
+        <h3>Sources</h3>
+        <p>
+          Données <a href="https://hubeau.eaufrance.fr/">Hub’Eau</a> (Office français de la
+          biodiversité, services de l’État), sous Licence Ouverte Etalab. Fonds de carte © IGN —
+          Géoplateforme.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import '../scripts/carte/main';
+</script>
+
+<style>
+  .carte-intro {
+    padding-block: var(--space-5) var(--space-4);
+  }
+
+  .carte-intro h1 {
+    font-size: var(--step-3);
+  }
+
+  .carte-intro .lead {
+    max-width: 48rem;
+    margin: 0;
+  }
+
+  .carte-notes {
+    padding-block: var(--space-6);
+  }
+
+  .carte-notes h2 {
+    font-size: var(--step-2);
+  }
+
+  .carte-notes__grille {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 56rem) {
+    .carte-notes__grille {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .carte-notes h3 {
+    font-size: var(--step-0);
+  }
+
+  .carte-notes p {
+    font-size: var(--step--1);
+    color: var(--color-text-muted);
+  }
+</style>
