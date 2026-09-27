@@ -6,52 +6,20 @@ import Braids from '../components/Braids.astro';
 import ContactCta from '../components/ContactCta.astro';
 import { formatDate } from '../lib/date';
 import { url } from '../lib/url';
+import { domaines } from '../data/prestations';
 
 import heroImage from '../assets/photos/retenue-bateau.jpg';
-import inventaires from '../assets/photos/peche-electrique-groupe.jpg';
-import plansEau from '../assets/photos/filets-demaillage.jpg';
-import continuite from '../assets/photos/passe-a-poissons.jpg';
-import gestion from '../assets/photos/gorges-vasque.jpg';
-import neige from '../assets/photos/biometrie-neige.jpg';
-import equipe from '../assets/photos/equipe-riviere.jpg';
 import epuisettes from '../assets/photos/peche-electrique-epuisettes.jpg';
 
 // Textes de maquette : à relire et valider.
-const domaines = [
-  {
-    title: 'Inventaires piscicoles',
-    text: 'Pêches électriques d’inventaire en cours d’eau, complètes ou partielles, selon des protocoles normalisés.',
-    image: inventaires,
-    alt: 'Une dizaine d’intervenants en waders progressent dans une rivière ombragée lors d’une pêche électrique.',
-  },
-  {
-    title: 'Plans d’eau et retenues',
-    text: 'Échantillonnage aux filets, suivis des peuplements lacustres, interventions en embarcation.',
-    image: plansEau,
-    alt: 'Un opérateur démaille des poissons pris dans un filet, sur une bâche étendue au bord d’une piste forestière.',
-  },
-  {
-    title: 'Continuité écologique',
-    text: 'Diagnostic des ouvrages, suivi de l’efficacité des dispositifs de franchissement piscicole.',
-    image: continuite,
-    alt: 'Passe à poissons à macro-rugosités : des rangées de plots cylindriques dans un courant clair, au bord d’une grande rivière.',
-  },
-  {
-    title: 'Conseil et gestion halieutique',
-    text: 'Accompagnement des gestionnaires et des structures de pêche, plans de gestion, expertise.',
-    image: gestion,
-    alt: 'Vasque turquoise au pied de hautes falaises calcaires couvertes de végétation.',
-  },
-];
-
 const etapes = [
   {
     title: 'Observer',
-    text: 'Des données de terrain fiables, collectées selon des protocoles reconnus, par tous les temps.',
+    text: 'Protocoles normalisés et saisie numérique sur le terrain : des données fiables, par tous les temps.',
   },
   {
     title: 'Analyser',
-    text: 'Traitement, bancarisation et interprétation écologique des résultats, sans boîte noire.',
+    text: 'Statistiques, modélisation et cartographie avec nos propres outils, sans boîte noire.',
   },
   {
     title: 'Conseiller',
@@ -81,8 +49,8 @@ const actualites = (await getCollection('actualites', ({ data }) => !data.draft)
       <p class="eyebrow eyebrow--light">Bureau d’études · Milieux aquatiques · Poissons · Pêche</p>
       <h1>Comprendre les milieux aquatiques pour mieux les gérer.</h1>
       <p class="hero__lead">
-        Inventaires piscicoles, suivis de plans d’eau, continuité écologique et conseil en gestion
-        halieutique, au service des collectivités, des structures de pêche et des acteurs privés.
+        Inventaires piscicoles, hydromorphologie, débits biologiques et études réglementaires, par
+        une équipe qui conçoit aussi ses propres outils numériques.
       </p>
       <div class="hero__actions">
         <a class="button button--accent" href={url('/prestations/')}>Nos prestations</a>
@@ -128,14 +96,16 @@ const actualites = (await getCollection('actualites', ({ data }) => !data.draft)
             <li class="domaine">
               <Image
                 src={domaine.image}
-                alt={domaine.alt}
+                alt={domaine.imageAlt}
                 widths={[400, 640, 900]}
-                sizes="(min-width: 64rem) 25vw, (min-width: 40rem) 50vw, 100vw"
+                sizes="(min-width: 64rem) 33vw, (min-width: 40rem) 50vw, 100vw"
                 quality={70}
               />
               <div class="domaine__body">
-                <h3>{domaine.title}</h3>
-                <p>{domaine.text}</p>
+                <h3>
+                  <a href={url(`/prestations/#${domaine.id}`)}>{domaine.title}</a>
+                </h3>
+                <p>{domaine.short}</p>
               </div>
             </li>
           ))
@@ -156,32 +126,14 @@ const actualites = (await getCollection('actualites', ({ data }) => !data.draft)
         </p>
         <a class="link-arrow" href={url('/equipe/')}>Découvrir l’équipe</a>
       </div>
-      <div class="mosaic">
-        <Image
-          class="mosaic__a"
-          src={neige}
-          alt="Un technicien saisit des mesures sur une tablette, à une table installée dans la neige au bord d’un torrent."
-          widths={[480, 800, 1200]}
-          sizes="(min-width: 64rem) 36vw, 100vw"
-          quality={70}
-        />
-        <Image
-          class="mosaic__b"
-          src={equipe}
-          alt="L’équipe pose dans une rivière, en waders, avec épuisettes et anode de pêche électrique."
-          widths={[400, 640]}
-          sizes="(min-width: 64rem) 20vw, 50vw"
-          quality={70}
-        />
-        <Image
-          class="mosaic__c"
-          src={epuisettes}
-          alt="Trois intervenants manient des épuisettes dans une eau claire au fond de galets."
-          widths={[400, 640]}
-          sizes="(min-width: 64rem) 20vw, 50vw"
-          quality={70}
-        />
-      </div>
+      <Image
+        class="terrain__image"
+        src={epuisettes}
+        alt="Trois intervenants manient des épuisettes dans une eau claire au fond de galets, lors d’une pêche électrique."
+        widths={[640, 1024, 1600]}
+        sizes="(min-width: 64rem) 60vw, 100vw"
+        quality={70}
+      />
     </div>
   </section>
 
@@ -414,11 +366,12 @@ const actualites = (await getCollection('actualites', ({ data }) => !data.draft)
 
   @media (min-width: 64rem) {
     .domaines {
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
     }
   }
 
   .domaine {
+    position: relative;
     overflow: hidden;
     border-radius: var(--radius);
     background: var(--color-white);
@@ -440,6 +393,22 @@ const actualites = (await getCollection('actualites', ({ data }) => !data.draft)
     color: var(--color-text-muted);
   }
 
+  .domaine h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Toute la carte est cliquable. */
+  .domaine h3 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .domaine:hover h3 a {
+    text-decoration: underline;
+  }
+
   /* ---------- Terrain ---------- */
   .terrain {
     display: grid;
@@ -454,27 +423,12 @@ const actualites = (await getCollection('actualites', ({ data }) => !data.draft)
     }
   }
 
-  .mosaic {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-3);
-  }
-
-  .mosaic img {
+  .terrain :global(.terrain__image) {
     width: 100%;
-    height: 100%;
+    aspect-ratio: 3 / 2;
     object-fit: cover;
     border-radius: var(--radius);
-  }
-
-  .mosaic :global(.mosaic__a) {
-    grid-column: 1 / -1;
-    aspect-ratio: 16 / 9;
-  }
-
-  .mosaic :global(.mosaic__b),
-  .mosaic :global(.mosaic__c) {
-    aspect-ratio: 4 / 3;
+    box-shadow: var(--shadow);
   }
 
   /* ---------- Approche ---------- */

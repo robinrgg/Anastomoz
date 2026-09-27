@@ -18,8 +18,8 @@ export const equipe: Membre[] = [
   {
     name: 'Robin Reguig',
     role: 'Cogérant, associé',
-    specialite: '[Spécialité, ex. hydrobiologiste]',
-    bio: '[Parcours, domaines d’expertise, terrains de prédilection : deux ou trois phrases.]',
+    specialite: 'Ingénieur hydraulicien et hydro-écologue',
+    bio: 'Diplômé de Polytech Montpellier, cinq ans d’expérience en bureau d’études : pêches électriques, hydromorphologie, débits minimums biologiques et suivi des chabots endémiques méditerranéens. Il développe aussi les outils numériques de l’équipe : applications de terrain, traitements de données et rapports automatisés.',
     photo: robin,
     photoAlt: 'Robin Reguig, au bord d’un plan d’eau, présente un black-bass.',
   },
