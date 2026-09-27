@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig, envField } from 'astro/config';
+import { satteri } from '@astrojs/markdown-satteri';
 
 // L'adresse du site est fournie par l'environnement de construction :
 //  - GitHub Pages (prévisualisation) : renseignée automatiquement par le workflow ;
@@ -8,6 +9,27 @@ import { defineConfig, envField } from 'astro/config';
 const site = process.env.SITE_URL || 'http://localhost:4321';
 const base = process.env.BASE_PATH || '/';
 
+// Dans les contenus Markdown (actualités…), les liens vers d'autres sites
+// s'ouvrent dans un nouvel onglet, sans transmettre l'accès à la page d'origine.
+/** @type {import('satteri').HastPluginDefinition} */
+const liensExternes = {
+  name: 'liens-externes',
+  element: {
+    filter: ['a'],
+    visit(node, ctx) {
+      if (!/^https?:\/\//.test(String(node.properties?.href ?? ''))) return;
+      ctx.setProperty(node, 'target', '_blank');
+      ctx.setProperty(node, 'rel', ['noopener', 'noreferrer']);
+      ctx.appendChild(node, {
+        type: 'element',
+        tagName: 'span',
+        properties: { className: ['visually-hidden'] },
+        children: [{ type: 'text', value: ' (nouvel onglet)' }],
+      });
+    },
+  },
+};
+
 export default defineConfig({
   site,
   base,
@@ -15,7 +37,7 @@ export default defineConfig({
   build: { format: 'directory' },
   // Pas de coloration de code dans les actualités : Shiki utilise des styles
   // en ligne incompatibles avec la CSP.
-  markdown: { syntaxHighlight: false },
+  markdown: { syntaxHighlight: false, processor: satteri({ hastPlugins: [liensExternes] }) },
   env: {
     schema: {
       // Passer à true le jour de la mise en ligne définitive : tant que c'est

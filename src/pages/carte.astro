@@ -28,10 +28,10 @@ Astro.csp.insertDirective("connect-src 'self' https://hubeau.eaufrance.fr");
 
     <div class="legende">
       <fieldset>
-        <legend class="legende__titre">Couches</legend>
+        <legend class="legende__titre">Données affichées</legend>
 
         <label class="legende__couche">
-          <input type="checkbox" id="couche-poissons" checked />
+          <input type="radio" name="couche" value="poissons" checked />
           <span>Poissons — indice poisson rivière (IPR)</span>
         </label>
         <ul class="legende__classes">
@@ -47,7 +47,7 @@ Astro.csp.insertDirective("connect-src 'self' https://hubeau.eaufrance.fr");
         </ul>
 
         <label class="legende__couche">
-          <input type="checkbox" id="couche-hydro" checked />
+          <input type="radio" name="couche" value="hydro" />
           <span><span class="pastille pastille--hydro" aria-hidden="true"></span>Débits en temps réel</span>
         </label>
       </fieldset>
@@ -72,10 +72,11 @@ Astro.csp.insertDirective("connect-src 'self' https://hubeau.eaufrance.fr");
       <div>
         <h3>Poissons</h3>
         <p>
-          Dernière pêche scientifique de chaque station du réseau national (Office français de la
-          biodiversité). L’<strong>indice poisson rivière (IPR)</strong> compare le peuplement observé
-          à celui attendu sans perturbation : plus la note est basse, meilleur est l’état. Il n’est
-          pas calculé en Corse. Liste des stations actualisée chaque mois.
+          Stations de pêche scientifique du réseau national (Office français de la biodiversité),
+          avec l’<strong>indice poisson rivière (IPR)</strong> de la dernière pêche : il compare le
+          peuplement observé à celui attendu sans perturbation, et plus la note est basse, meilleur
+          est l’état. Il n’est pas calculé en Corse. La fiche liste toutes les espèces capturées sur
+          les dix dernières années.
         </p>
       </div>
       <div>
@@ -90,9 +91,10 @@ Astro.csp.insertDirective("connect-src 'self' https://hubeau.eaufrance.fr");
       <div>
         <h3>Sources</h3>
         <p>
-          Données <a href="https://hubeau.eaufrance.fr/">Hub’Eau</a> (Office français de la
-          biodiversité, services de l’État), sous Licence Ouverte Etalab. Fonds de carte © IGN —
-          Géoplateforme.
+          Données <a href="https://hubeau.eaufrance.fr/" target="_blank" rel="noopener noreferrer"
+            >Hub’Eau<span class="visually-hidden"> (nouvel onglet)</span></a
+          > (Office français de la biodiversité, services de l’État), sous Licence Ouverte Etalab 2.0,
+          actualisées chaque mois. Fonds de carte © IGN — Géoplateforme.
         </p>
       </div>
     </div>

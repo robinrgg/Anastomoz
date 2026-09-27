@@ -113,11 +113,14 @@ Le dossier `photos-originales/` est ignoré par Git.
 
 ## Carte interactive
 
-Page `/carte/`. Deux couches, sur fonds IGN (plan ou photographies aériennes) :
+Page `/carte/`. Une seule couche affichée à la fois (poissons **ou** débits), au choix
+dans la légende. Deux fonds IGN : « Plan IGN — relief et rivières » (plan IGN désaturé,
+estompage du relief en mode produit, réseau hydrographique par-dessus ; effets dans
+`carte.css`) ou photographies aériennes.
 
 | Couche | Préparé à l'avance (GitHub Actions) | Interrogé en direct au clic |
 |---|---|---|
-| **Poissons** | Dernière pêche de chaque station : note et classe IPR, date, protocole (API État piscicole). Corse : dernière pêche, IPR non applicable. | Espèces capturées lors de cette pêche |
+| **Poissons** | Dernière pêche de chaque station : note et classe IPR, date, protocole (API État piscicole). Corse : dernière pêche, IPR non applicable. | Liste exhaustive des espèces capturées sur les 10 dernières années (à défaut : lors du dernier suivi) |
 | **Débits** | Stations en service ayant publié un débit sur les 15 derniers jours, avec module, Q25 et QMNA5 (`data/stations_debits.csv`) | Débit instantané et débits journaliers des 14 derniers jours |
 
 **Actualisation** : le workflow `donnees-carte.yml` régénère `public/data/carte/*.json`
@@ -129,7 +132,9 @@ carte garde alors les données précédentes.
 **Sécurité** : exceptions à la CSP limitées à la page de la carte
 (`Astro.csp.insertDirective`) : `img-src https://data.geopf.fr` (tuiles IGN) et
 `connect-src https://hubeau.eaufrance.fr` (données en direct). Les textes venant des
-API sont insérés comme texte, jamais comme HTML. Leaflet est installé via npm et servi
+API sont insérés comme texte, jamais comme HTML. Tous les liens externes du site
+s'ouvrent dans un nouvel onglet (`rel="noopener noreferrer"`), y compris dans les
+actualités (extension Markdown dans `astro.config.mjs`). Leaflet est installé via npm et servi
 par le site (aucun CDN). Graphique des débits dessiné en SVG, sans bibliothèque.
 
 **Débits de référence** : `data/stations_debits.csv` provient de l'application

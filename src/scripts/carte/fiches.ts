@@ -8,10 +8,22 @@ import { graphiqueDebits } from './graphique';
 
 const HUBEAU = 'https://hubeau.eaufrance.fr/api';
 
+/** Requête JSON vers Hub'Eau, avec une nouvelle tentative (le service a des ratés passagers). */
+async function recuperer<T>(url: string, signal: AbortSignal, essais = 2): Promise<T> {
+  try {
+    const res = await fetch(url, { signal });
+    if (res.status !== 200 && res.status !== 206) throw new Error(`Hub’Eau indisponible (${res.status})`);
+    return await res.json();
+  } catch (e) {
+    if (signal.aborted || essais <= 1) throw e;
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    return recuperer(url, signal, essais - 1);
+  }
+}
+
 async function hubeau<T>(chemin: string, params: Record<string, string>, signal: AbortSignal): Promise<T[]> {
-  const res = await fetch(`${HUBEAU}${chemin}?${new URLSearchParams(params)}`, { signal });
-  if (res.status !== 200 && res.status !== 206) throw new Error(`Hub’Eau indisponible (${res.status})`);
-  return (await res.json()).data ?? [];
+  const corps = await recuperer<{ data?: T[] }>(`${HUBEAU}${chemin}?${new URLSearchParams(params)}`, signal);
+  return corps.data ?? [];
 }
 
 const jourIso = (decalageJours = 0) => new Date(Date.now() - decalageJours * 86_400_000).toISOString().slice(0, 10);
@@ -29,13 +41,38 @@ const erreur = (texte: string) => h('p', { class: 'fiche__erreur', role: 'alert'
 
 // ------------------------------------------------------------------ Poissons
 
+/** Fenêtre de recherche des espèces : les 10 dernières années. */
+const ANNEES_ESPECES = 10;
+
+interface Observation { code_operation: number | string; date_operation: string; nom_commun_taxon: string | null }
+interface PageObservations { data?: Observation[]; next?: string | null; count: number }
+
+/** Toutes les observations d'une station depuis une date (suit la pagination). */
+async function observationsStation(code: string, depuis: string, signal: AbortSignal): Promise<Observation[]> {
+  let url: string | null = `${HUBEAU}/v1/etat_piscicole/observations?${new URLSearchParams({
+    code_station: code,
+    date_operation_min: depuis,
+    fields: 'code_operation,date_operation,nom_commun_taxon',
+    size: '20000',
+  })}`;
+  const lignes: Observation[] = [];
+  while (url) {
+    const corps: PageObservations = await recuperer<PageObservations>(url, signal);
+    lignes.push(...(corps.data ?? []));
+    url = corps.data?.length && lignes.length < corps.count ? corps.next ?? null : null;
+  }
+  return lignes;
+}
+
+const annee = (iso: string) => iso.slice(0, 4);
+
 export function fichePoisson(station: StationPoisson, signal: AbortSignal): HTMLElement {
   const lieu = [station.coursEau, capitalize(station.commune)].filter(Boolean).join(' · ');
 
   const ipr =
     station.iprNote !== null
       ? h('div', { class: 'ipr' },
-          h('p', { class: 'ipr__note' }, h('span', {}, station.iprNote.toLocaleString('fr-FR')), h('small', {}, 'IPR')),
+          h('p', { class: 'ipr__note' }, h('span', {}, station.iprNote.toLocaleString('fr-FR')), h('small', {}, `IPR ${annee(station.date)}`)),
           h('p', { class: 'ipr__classe' },
             h('span', { class: `pastille pastille--ipr-${station.iprClasse}`, 'aria-hidden': 'true' }),
             `État ${(station.iprLibelle ?? '').toLowerCase()}`,
@@ -43,36 +80,54 @@ export function fichePoisson(station: StationPoisson, signal: AbortSignal): HTML
         )
       : h('p', { class: 'fiche__note' }, 'Indice poisson rivière non applicable sur cette station (Corse).');
 
-  const especes = h('div', { class: 'especes' }, chargement('Chargement des espèces…'));
+  const derniere = h('dd', {}, annee(station.date));
+  const titreEspeces = h('h3', { class: 'fiche__section' }, 'Espèces capturées');
+  const especes = h('div', { class: 'especes' }, chargement('Recherche des espèces capturées…'));
 
   const fiche = h('article', { class: 'fiche', 'aria-labelledby': 'fiche-titre' },
     entete('Peuplement piscicole', station.nom, lieu),
     ipr,
     h('dl', { class: 'fiche__infos' },
-      h('dt', {}, 'Dernière pêche'), h('dd', {}, formatDate(station.date)),
+      h('dt', {}, 'Dernière pêche'), derniere,
       station.protocole ? h('dt', {}, 'Protocole') : null,
       station.protocole ? h('dd', {}, station.protocole) : null,
     ),
-    h('h3', { class: 'fiche__section' }, 'Espèces capturées'),
+    titreEspeces,
     especes,
-    h('p', { class: 'fiche__source' }, 'Source : Hub’Eau, API État piscicole (OFB).'),
+    h('p', { class: 'fiche__source' }, 'Source : Hub’Eau'),
   );
 
-  hubeau<{ nom_commun_taxon: string | null; nom_latin_taxon: string | null }>(
-    '/v1/etat_piscicole/observations',
-    { code_operation: station.codeOperation, fields: 'nom_commun_taxon,nom_latin_taxon', size: '5000' },
-    signal,
-  )
-    .then((rows) => {
-      const noms = new Map<string, string | null>();
-      for (const r of rows) if (r.nom_commun_taxon) noms.set(r.nom_commun_taxon, r.nom_latin_taxon);
-      const tries = [...noms].sort(([a], [b]) => a.localeCompare(b, 'fr'));
+  // Liste exhaustive des espèces capturées sur les 10 dernières années ; à défaut
+  // (aucune pêche récente), celles du dernier suivi connu.
+  const depuis = new Date();
+  depuis.setFullYear(depuis.getFullYear() - ANNEES_ESPECES);
+  const depuisIso = depuis.toISOString().slice(0, 10);
+
+  observationsStation(station.code, depuisIso, signal)
+    .then(async (lignes) => {
+      let libelle: string;
+      if (lignes.length > 0) {
+        const operations = new Set(lignes.map((l) => String(l.code_operation)));
+        const annees = lignes.map((l) => annee(l.date_operation)).sort();
+        derniere.textContent = annees.at(-1)!;
+        libelle = operations.size > 1
+          ? `Espèces capturées depuis ${annee(depuisIso)} · ${operations.size} pêches (${annees[0]}–${annees.at(-1)})`
+          : `Espèces capturées lors de la pêche de ${annees[0]}`;
+      } else {
+        lignes = await hubeau<Observation>('/v1/etat_piscicole/observations', {
+          code_operation: station.codeOperation,
+          fields: 'code_operation,date_operation,nom_commun_taxon',
+          size: '5000',
+        }, signal);
+        libelle = `Espèces capturées lors du dernier suivi (${annee(station.date)})`;
+      }
+      const noms = [...new Set(lignes.map((l) => l.nom_commun_taxon).filter((n): n is string => Boolean(n)))]
+        .sort((a, b) => a.localeCompare(b, 'fr'));
+      titreEspeces.textContent = libelle;
       especes.replaceChildren(
-        tries.length === 0
-          ? h('p', { class: 'fiche__note' }, 'Aucun poisson capturé lors de cette pêche.')
-          : h('ul', { class: 'especes__liste' },
-              ...tries.map(([commun, latin]) => h('li', {}, commun, latin ? h('i', {}, latin) : null)),
-            ),
+        noms.length === 0
+          ? h('p', { class: 'fiche__note' }, 'Aucun poisson capturé.')
+          : h('ul', { class: 'especes__liste' }, ...noms.map((nom) => h('li', {}, nom))),
       );
     })
     .catch((e) => {
@@ -100,7 +155,7 @@ export function ficheHydro(station: StationHydro, signal: AbortSignal): HTMLElem
   const fiche = h('article', { class: 'fiche', 'aria-labelledby': 'fiche-titre' },
     entete('Débits en temps réel', station.nom, lieu),
     contenu,
-    h('p', { class: 'fiche__source' }, 'Source : Hub’Eau, API Hydrométrie. Données brutes, non validées.'),
+    h('p', { class: 'fiche__source' }, 'Source : Hub’Eau · données brutes, non validées'),
   );
 
   Promise.all([

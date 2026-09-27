@@ -16,14 +16,23 @@ const etat = document.getElementById('carte-etat');
 
 if (conteneur && panneau && panneauContenu && boutonFermer && etat) {
   // ---------------------------------------------------------------- Fonds IGN
-  const ign = (couche: string, format: string) =>
+  // Lien externe : toujours dans un nouvel onglet, pour ne pas quitter la carte.
+  const lien = (href: string, texte: string) =>
+    `<a href="${href}" target="_blank" rel="noopener noreferrer">${texte}<span class="visually-hidden"> (nouvel onglet)</span></a>`;
+  const ATTRIBUTION_IGN = `© ${lien('https://www.ign.fr/', 'IGN')} — Géoplateforme`;
+
+  const ign = (couche: string, style: string, matrices: string, format: string, options: L.TileLayerOptions = {}) =>
     L.tileLayer(
-      'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM' +
-        `&LAYER=${couche}&FORMAT=${format}&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}`,
-      { maxZoom: 18, attribution: '© <a href="https://www.ign.fr/">IGN</a> — Géoplateforme' },
+      'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0' +
+        `&LAYER=${couche}&STYLE=${style}&TILEMATRIXSET=${matrices}&FORMAT=${format}` +
+        '&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}',
+      { maxZoom: 18, attribution: ATTRIBUTION_IGN, ...options },
     );
-  const plan = ign('GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2', 'image/png');
-  const photos = ign('ORTHOIMAGERY.ORTHOPHOTOS', 'image/jpeg');
+
+  // Plan « relief et rivières » : plan IGN adouci, estompage du relief et réseau
+  // hydrographique mis en valeur. Les effets visuels sont définis dans carte.css.
+  const planDoux = ign('GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2', 'normal', 'PM_0_19', 'image/png', { className: 'fond-plan' });
+  const photos = ign('ORTHOIMAGERY.ORTHOPHOTOS', 'normal', 'PM_0_19', 'image/jpeg', { maxNativeZoom: 19 });
 
   // Cadrage initial : France métropolitaine et Corse, quelle que soit la taille d'écran.
   const FRANCE = L.latLngBounds([41.3, -5.2], [51.1, 9.6]);
@@ -31,19 +40,32 @@ if (conteneur && panneau && panneauContenu && boutonFermer && etat) {
     minZoom: 5,
     zoomSnap: 0.5,
     maxBounds: L.latLngBounds([40, -7], [52.5, 11.5]),
-    layers: [plan],
     preferCanvas: true,
   });
+  carte.createPane('relief').classList.add('pane-relief');
+  carte.createPane('rivieres').classList.add('pane-rivieres');
+
+  const relief = ign('ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW', 'estompage_grayscale', 'PM_0_15', 'image/png', {
+    pane: 'relief',
+    maxNativeZoom: 15,
+    attribution: '',
+  });
+  const rivieres = ign('HYDROGRAPHY.HYDROGRAPHY', 'normal', 'PM_6_18', 'image/png', {
+    pane: 'rivieres',
+    minZoom: 6,
+    attribution: '',
+  });
+  const plan = L.layerGroup([planDoux, relief, rivieres]).addTo(carte);
+
   carte.fitBounds(FRANCE);
-  L.control.layers({ 'Plan IGN': plan, 'Photographies aériennes': photos }, undefined, { position: 'topright' }).addTo(carte);
+  L.control.layers({ 'Plan IGN — relief et rivières': plan, 'Photographies aériennes': photos }, undefined, { position: 'topright' }).addTo(carte);
   L.control.scale({ imperial: false }).addTo(carte);
   carte.attributionControl.setPrefix(false);
-  carte.attributionControl.addAttribution('Données : <a href="https://hubeau.eaufrance.fr/">Hub’Eau</a>');
+  carte.attributionControl.addAttribution(`Données : ${lien('https://hubeau.eaufrance.fr/', 'Hub’Eau')}`);
 
   const rendu = L.canvas({ padding: 0.5 });
-  // Ordre d'ajout = ordre d'affichage : les points « poissons », colorés, restent au-dessus.
-  const coucheHydro = L.layerGroup().addTo(carte);
   const couchePoissons = L.layerGroup().addTo(carte);
+  const coucheHydro = L.layerGroup(); // affichée à la demande (une couche à la fois)
 
   // Taille des points selon le zoom : discrets à l'échelle nationale, plus gros de près.
   const rayon = () => { const z = carte.getZoom(); return z <= 6 ? 3.5 : z <= 8 ? 4.5 : 6; };
@@ -122,17 +144,18 @@ if (conteneur && panneau && panneauContenu && boutonFermer && etat) {
     }
   }
 
-  // Cases à cocher de la légende : afficher / masquer chaque couche.
-  for (const [id, couche] of [['couche-poissons', couchePoissons], ['couche-hydro', coucheHydro]] as const) {
-    const caseACocher = document.getElementById(id) as HTMLInputElement | null;
-    caseACocher?.addEventListener('change', () => {
-      if (caseACocher.checked) {
-        couche.addTo(carte);
-        // Les points « poissons » doivent rester dessinés au-dessus des débits.
-        if (couche === coucheHydro && carte.hasLayer(couchePoissons)) couchePoissons.remove().addTo(carte);
-      } else {
-        couche.remove();
-      }
+  // Boutons radio de la légende : une seule couche affichée à la fois.
+  const couches = { poissons: couchePoissons, hydro: coucheHydro } as const;
+  function afficherCouche(nom: keyof typeof couches) {
+    if (selection) fermerFiche();
+    for (const [cle, couche] of Object.entries(couches)) {
+      if (cle === nom) couche.addTo(carte);
+      else couche.remove();
+    }
+  }
+  for (const radio of document.querySelectorAll<HTMLInputElement>('input[name="couche"]')) {
+    radio.addEventListener('change', () => {
+      if (radio.checked) afficherCouche(radio.value as keyof typeof couches);
     });
   }
 
