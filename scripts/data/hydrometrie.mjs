@@ -83,7 +83,7 @@ assertMinimum('Stations hydrométriques actives', records.length, 1_500);
 
 await writeJson(OUTPUT, {
   genere: new Date().toISOString(),
-  source: 'Hub’Eau — API Hydrométrie, Licence Ouverte Etalab',
+  source: 'Hub’Eau, API Hydrométrie, Licence Ouverte Etalab',
   champs: ['code_station', 'lat', 'lon', 'nom', 'cours_eau', 'commune', 'module', 'q25', 'qmna5', 'annees'],
   stations: records,
 });

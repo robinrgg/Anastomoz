@@ -18,7 +18,7 @@ if (conteneur && panneau && panneauContenu && boutonFermer && etat) {
   // Lien externe : toujours dans un nouvel onglet, pour ne pas quitter la carte.
   const lien = (href: string, texte: string) =>
     `<a href="${href}" target="_blank" rel="noopener noreferrer">${texte}<span class="visually-hidden"> (nouvel onglet)</span></a>`;
-  const ATTRIBUTION_IGN = `© ${lien('https://www.ign.fr/', 'IGN')} — Géoplateforme`;
+  const ATTRIBUTION_IGN = `© ${lien('https://www.ign.fr/', 'IGN')}, Géoplateforme`;
 
   const ign = (couche: string, style: string, matrices: string, format: string, options: L.TileLayerOptions = {}) =>
     L.tileLayer(
@@ -62,7 +62,7 @@ if (conteneur && panneau && panneauContenu && boutonFermer && etat) {
   const plan = L.layerGroup([planDoux, relief, rivieres]).addTo(carte);
 
   carte.fitBounds(FRANCE);
-  L.control.layers({ 'Plan IGN — relief et rivières': plan, 'Photographies aériennes': photos }, undefined, { position: 'topright' }).addTo(carte);
+  L.control.layers({ 'Plan IGN (relief et rivières)': plan, 'Photographies aériennes': photos }, undefined, { position: 'topright' }).addTo(carte);
   L.control.scale({ imperial: false }).addTo(carte);
   carte.attributionControl.setPrefix(false);
   carte.attributionControl.addAttribution(`Données : ${lien('https://hubeau.eaufrance.fr/', 'Hub’Eau')}`);

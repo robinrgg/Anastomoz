@@ -81,7 +81,7 @@ assertMinimum('Stations poissons', stations.length, 5_000);
 
 await writeJson(OUTPUT, {
   genere: new Date().toISOString(),
-  source: 'Hub’Eau — API État piscicole (OFB), Licence Ouverte Etalab',
+  source: 'Hub’Eau, API État piscicole (OFB), Licence Ouverte Etalab',
   champs: [
     'code_station',
     'lat',

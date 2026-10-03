@@ -110,7 +110,7 @@ export function fichePoisson(station: StationPoisson, signal: AbortSignal): HTML
         const annees = lignes.map((l) => annee(l.date_operation)).sort();
         derniere.textContent = annees.at(-1)!;
         libelle = operations.size > 1
-          ? `Espèces capturées depuis ${annee(depuisIso)} · ${operations.size} pêches (${annees[0]}–${annees.at(-1)})`
+          ? `Espèces capturées depuis ${annee(depuisIso)} · ${operations.size} pêches, de ${annees[0]} à ${annees.at(-1)}`
           : `Espèces capturées lors de la pêche de ${annees[0]}`;
       } else {
         lignes = await hubeau<Observation>('/v1/etat_piscicole/observations', {
@@ -206,7 +206,7 @@ export function ficheHydro(station: StationHydro, signal: AbortSignal): HTMLElem
         ),
       ];
       blocs.push(
-        h('h3', { class: 'fiche__section' }, 'Débit moyen journalier — 14 derniers jours'),
+        h('h3', { class: 'fiche__section' }, 'Débit moyen journalier sur 14 jours'),
         serie.length > 1 ? graphiqueDebits(serie, station) : h('p', { class: 'fiche__note' }, 'Série trop courte pour tracer un graphique.'),
       );
       contenu.replaceChildren(...blocs);

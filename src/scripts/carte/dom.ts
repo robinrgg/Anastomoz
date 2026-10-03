@@ -35,7 +35,7 @@ export const formatHour = (iso: string) => hourFormatter.format(new Date(iso));
 
 /** Débit en m³/s avec un nombre de chiffres adapté à son ordre de grandeur. */
 export function formatDebit(value: number | null | undefined): string {
-  if (value === null || value === undefined || Number.isNaN(value)) return '—';
+  if (value === null || value === undefined || Number.isNaN(value)) return 'n.d.';
   if (value === 0) return '0';
   const digits = value >= 100 ? 0 : value >= 10 ? 1 : value >= 1 ? 2 : 3;
   return value.toLocaleString('fr-FR', { minimumFractionDigits: digits, maximumFractionDigits: digits });
@@ -43,7 +43,7 @@ export function formatDebit(value: number | null | undefined): string {
 
 /** Met une majuscule initiale à un libellé tout en capitales (« VIGNEULLES » → « Vigneulles »). */
 export function capitalize(text: string | null): string {
-  if (!text) return '—';
+  if (!text) return '';
   if (text !== text.toUpperCase()) return text;
   return text.toLowerCase().replace(/(^|[\s'-])(\p{L})/gu, (_, sep: string, letter: string) => sep + letter.toUpperCase());
 }
