@@ -87,7 +87,7 @@ d'un domaine.
 | Non-indexation tant que le site n'est pas officiel | `SITE_INDEXABLE`, balise `noindex` et `robots.txt` |
 | Métadonnées des photos (GPS, appareil) supprimées **avant** l'ajout au dépôt | `npm run photos` |
 | Contrôle automatique : la construction échoue si une image contient des coordonnées GPS | `npm run check:images` |
-| Dépendances verrouillées (`package-lock.json`), audit à chaque construction | workflow |
+| Dépendances verrouillées (`package-lock.json`), audit à chaque construction (`npm run audit`) ; failles sans correctif acceptées seulement si justifiées, avec date de réexamen | `audit-exceptions.json` |
 | Actions GitHub épinglées par empreinte (SHA), droits minimaux | workflow |
 | Exceptions CSP limitées à la carte (IGN, Hub'Eau) | `src/pages/carte.astro` |
 | Aucun secret dans le dépôt | règle absolue, le dépôt est public |

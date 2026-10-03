@@ -1,0 +1,11 @@
+{
+  "_lisez-moi": "Failles connues acceptées temporairement, faute de correctif. Chaque exception doit être justifiée et réexaminée avant sa date d'expiration ; passé cette date, la construction échoue à nouveau.",
+  "exceptions": [
+    {
+      "avis": "GHSA-ch52-4w7c-c8xp",
+      "paquet": "http-cache-semantics",
+      "raison": "Aucune version corrigée publiée. Utilisé par Astro uniquement pour le cache des images distantes à la construction (assets/build/remote.js) ; le site n'utilise pas d'images distantes et ne sert aucun cache partagé entre utilisateurs (site statique).",
+      "revoirAvant": "2026-12-31"
+    }
+  ]
+}

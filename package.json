@@ -14,7 +14,8 @@
     "photos": "node scripts/prepare-photos.mjs",
     "check:images": "node scripts/check-images.mjs",
     "data:poissons": "node scripts/data/poissons.mjs",
-    "data:hydrometrie": "node scripts/data/hydrometrie.mjs"
+    "data:hydrometrie": "node scripts/data/hydrometrie.mjs",
+    "audit": "node scripts/audit.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-satteri": "^0.4.2",
