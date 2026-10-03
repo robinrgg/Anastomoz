@@ -35,7 +35,12 @@ if (conteneur && panneau && panneauContenu && boutonFermer && etat) {
 
   // Cadrage initial : France métropolitaine et Corse, quelle que soit la taille d'écran.
   const FRANCE = L.latLngBounds([41.3, -5.2], [51.1, 9.6]);
+  // Écrans tactiles : un doigt fait défiler la page, deux doigts déplacent et zooment
+  // la carte. Souris : la molette fait défiler la page, Ctrl + molette zoome.
+  const tactile = window.matchMedia('(pointer: coarse)').matches;
   const carte = L.map(conteneur, {
+    dragging: !tactile,
+    scrollWheelZoom: false,
     minZoom: 5,
     zoomSnap: 0.5,
     maxBounds: L.latLngBounds([40, -7], [52.5, 11.5]),
@@ -67,7 +72,10 @@ if (conteneur && panneau && panneauContenu && boutonFermer && etat) {
   const coucheHydro = L.layerGroup(); // affichée à la demande (une couche à la fois)
 
   // Taille des points selon le zoom : discrets à l'échelle nationale, plus gros de près.
-  const rayon = () => { const z = carte.getZoom(); return z <= 6 ? 3.5 : z <= 8 ? 4.5 : 6; };
+  const rayon = () => {
+    const z = carte.getZoom();
+    return (z <= 6 ? 3.5 : z <= 8 ? 4.5 : 6) + (tactile ? 1 : 0);
+  };
   const RAYON_SELECTION = 9;
   carte.on('zoomend', () => {
     const r = rayon();
@@ -111,37 +119,87 @@ if (conteneur && panneau && panneauContenu && boutonFermer && etat) {
   });
 
   // ---------------------------------------------------------------- Couches
+  // Chaque point garde sa fiche ; la sélection se fait au clic sur la carte, en
+  // retenant la station la plus proche dans un rayon généreux (surtout au doigt).
+  interface Point { marqueur: L.CircleMarker; fiche: (signal: AbortSignal) => HTMLElement }
+  const points = new Map<L.LayerGroup, Point[]>([[couchePoissons, []], [coucheHydro, []]]);
+  const TOLERANCE = tactile ? 24 : 12; // pixels
+
+  function ajouterPoint(couche: L.LayerGroup, lat: number, lon: number, nom: string, couleur: string, fiche: Point['fiche']) {
+    const marqueur = L.circleMarker([lat, lon], {
+      renderer: rendu,
+      radius: rayon(),
+      weight: 1,
+      color: '#ffffff',
+      fillColor: couleur,
+      fillOpacity: 0.95,
+      // Au doigt, pas d'info-bulle : le toucher ouvre directement la fiche.
+      interactive: !tactile,
+    });
+    if (!tactile) marqueur.bindTooltip(nom, { direction: 'top', offset: [0, -6] });
+    marqueur.addTo(couche);
+    points.get(couche)!.push({ marqueur, fiche });
+  }
+
   function ajouterPoissons(stations: StationPoisson[]) {
     for (const s of stations) {
-      const m = L.circleMarker([s.lat, s.lon], {
-        renderer: rendu,
-        radius: rayon(),
-        weight: 1,
-        color: '#ffffff',
-        fillColor: couleurIpr(s.iprClasse),
-        fillOpacity: 0.95,
-      });
-      m.bindTooltip(s.nom, { direction: 'top', offset: [0, -6] });
-      m.on('click', () => ouvrirFiche(m, (signal) => fichePoisson(s, signal)));
-      m.addTo(couchePoissons);
+      ajouterPoint(couchePoissons, s.lat, s.lon, s.nom, couleurIpr(s.iprClasse), (signal) => fichePoisson(s, signal));
     }
   }
 
   function ajouterHydro(stations: StationHydro[]) {
     for (const s of stations) {
-      const m = L.circleMarker([s.lat, s.lon], {
-        renderer: rendu,
-        radius: rayon(),
-        weight: 1,
-        color: '#ffffff',
-        fillColor: COULEUR_HYDRO,
-        fillOpacity: 0.95,
-      });
-      m.bindTooltip(s.nom, { direction: 'top', offset: [0, -6] });
-      m.on('click', () => ouvrirFiche(m, (signal) => ficheHydro(s, signal)));
-      m.addTo(coucheHydro);
+      ajouterPoint(coucheHydro, s.lat, s.lon, s.nom, COULEUR_HYDRO, (signal) => ficheHydro(s, signal));
     }
   }
+
+  carte.on('click', (e: L.LeafletMouseEvent) => {
+    const couche = carte.hasLayer(couchePoissons) ? couchePoissons : coucheHydro;
+    let proche: Point | null = null;
+    let distance = TOLERANCE;
+    for (const p of points.get(couche)!) {
+      const d = carte.latLngToContainerPoint(p.marqueur.getLatLng()).distanceTo(e.containerPoint);
+      if (d <= distance) {
+        distance = d;
+        proche = p;
+      }
+    }
+    if (proche) ouvrirFiche(proche.marqueur, proche.fiche);
+  });
+
+  // ---------------------------------------------------------------- Gestes
+  const aide = document.createElement('div');
+  aide.className = 'carte-aide';
+  aide.setAttribute('aria-hidden', 'true');
+  conteneur.append(aide);
+  let minuterieAide: number | undefined;
+  function montrerAide(texte: string) {
+    aide.textContent = texte;
+    aide.classList.add('is-visible');
+    window.clearTimeout(minuterieAide);
+    minuterieAide = window.setTimeout(() => aide.classList.remove('is-visible'), 1500);
+  }
+
+  if (tactile) {
+    conteneur.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 1) montrerAide('Utilisez deux doigts pour déplacer la carte');
+    }, { passive: true });
+  }
+
+  // Ctrl + molette (ou pincement sur pavé tactile) : zoom par paliers d'un demi-niveau.
+  let cumulMolette = 0;
+  conteneur.addEventListener('wheel', (e) => {
+    if (!(e.ctrlKey || e.metaKey)) {
+      montrerAide('Ctrl + molette pour zoomer sur la carte');
+      return;
+    }
+    e.preventDefault();
+    cumulMolette += e.deltaY;
+    if (Math.abs(cumulMolette) < 50) return;
+    const sens = cumulMolette > 0 ? -1 : 1;
+    cumulMolette = 0;
+    carte.setZoomAround(carte.mouseEventToContainerPoint(e), carte.getZoom() + sens * 0.5);
+  }, { passive: false });
 
   // Boutons radio de la légende : une seule couche affichée à la fois.
   const couches = { poissons: couchePoissons, hydro: coucheHydro } as const;

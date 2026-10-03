@@ -123,6 +123,11 @@ estompage du relief en mode produit, réseau hydrographique par-dessus ; effets 
 | **Poissons** | Dernière pêche de chaque station : note et classe IPR, date, protocole (API État piscicole). Corse : dernière pêche, IPR non applicable. | Liste exhaustive des espèces capturées sur les 10 dernières années (à défaut : lors du dernier suivi) |
 | **Débits** | Stations en service ayant publié un débit sur les 15 derniers jours, avec module, Q25 et QMNA5 (`data/stations_debits.csv`) | Débit instantané et débits journaliers des 14 derniers jours |
 
+**Navigation** : un clic (ou un toucher) sélectionne la station la plus proche dans un
+rayon de 12 px (24 px au doigt). Gestes « coopératifs » : sur écran tactile, un doigt
+fait défiler la page et deux doigts déplacent ou zooment la carte ; à la souris, la
+molette fait défiler la page et Ctrl + molette zoome. Un message rappelle le geste.
+
 **Actualisation** : le workflow `donnees-carte.yml` régénère `public/data/carte/*.json`
 (poissons le 1er du mois, débits chaque jour), les enregistre dans le dépôt puis
 relance la publication. Lancement manuel : onglet Actions → « Données de la carte ».
