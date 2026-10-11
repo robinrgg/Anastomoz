@@ -1,6 +1,6 @@
 # Anastomose, site internet
 
-Site du bureau d'études Anastomose (milieux aquatiques, poissons, pêche).
+Site d'Anastomose, expertise piscicole et halieutique.
 
 - Prévisualisation : https://robinrgg.github.io/Anastomoz/
 - Choix techniques et checklist de mise en ligne : [ARCHITECTURE.md](ARCHITECTURE.md)

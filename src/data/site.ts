@@ -5,7 +5,7 @@ import { SITE_INDEXABLE } from 'astro:env/server';
 
 export const site = {
   name: 'Anastomose',
-  tagline: 'Bureau d’études en milieux aquatiques, poissons et pêche',
+  tagline: 'Expertise piscicole et halieutique',
   description:
     'Anastomose, bureau d’études et de conseil spécialisé dans les milieux aquatiques, les peuplements piscicoles et la gestion halieutique.',
   locale: 'fr_FR',
