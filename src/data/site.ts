@@ -4,10 +4,10 @@ import { SITE_INDEXABLE } from 'astro:env/server';
 // une fois la société immatriculée (voir la checklist dans ARCHITECTURE.md).
 
 export const site = {
-  name: 'Anastomoz',
+  name: 'Anastomose',
   tagline: 'Bureau d’études en milieux aquatiques, poissons et pêche',
   description:
-    'Anastomoz, bureau d’études et de conseil spécialisé dans les milieux aquatiques, les peuplements piscicoles et la gestion halieutique.',
+    'Anastomose, bureau d’études et de conseil spécialisé dans les milieux aquatiques, les peuplements piscicoles et la gestion halieutique.',
   locale: 'fr_FR',
   contact: {
     email: '[contact@domaine.fr]',

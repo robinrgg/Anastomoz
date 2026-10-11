@@ -1,7 +1,7 @@
 ---
-title: "Anastomoz prend forme"
+title: "Anastomose prend forme"
 date: 2026-09-26
-description: "Premiers pas du futur bureau d’études Anastomoz, entre pêches scientifiques, suivis de retenues et restauration de la continuité écologique."
+description: "Premiers pas du futur bureau d’études Anastomose, entre pêches scientifiques, suivis de retenues et restauration de la continuité écologique."
 image: ./photo.jpg
 imageAlt: "L’équipe en waders et gants de protection, debout dans une rivière ombragée lors d’une pêche électrique."
 draft: false

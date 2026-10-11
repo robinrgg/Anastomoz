@@ -1,4 +1,4 @@
-# Architecture du site Anastomoz
+# Architecture du site Anastomose
 
 Ce document garde la trace des choix techniques et de leurs raisons.
 Il est à mettre à jour à chaque décision structurante.
@@ -166,6 +166,6 @@ puis lancer le workflow « Données de la carte ».
 - [ ] Outil de mesure d'audience exempté de consentement (CNIL) choisi
 - [ ] Photos définitives de l'équipe (`src/assets/equipe/`, via `npm run photos`)
 - [ ] Forme de la SCOP (SARL ou SAS) reportée dans les mentions légales et les fonctions de l'équipe
-- [ ] Logo définitif en SVG, avec une version simplifiée pour l'icône
+- [ ] Logo en vrai format vectoriel (le SVG actuel contient une image PNG), avec une version simplifiée pour l'icône
 - [ ] Plan du site (sitemap) pour les moteurs de recherche
 - [ ] Dépôt passé en privé

@@ -4,6 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { site } from '../data/site';
 import { url } from '../lib/url';
+import logoPartage from '../assets/brand/logo-anastomose.png';
 
 interface Props {
   title?: string;
@@ -12,7 +13,8 @@ interface Props {
   ogImage?: string;
 }
 
-const { title, description = site.description, ogImage } = Astro.props;
+// Image de partage par défaut (réseaux sociaux, messageries) : le logo complet.
+const { title, description = site.description, ogImage = logoPartage.src } = Astro.props;
 const fullTitle = title ? `${title} | ${site.name}` : `${site.name} | ${site.tagline}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---

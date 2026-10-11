@@ -175,7 +175,7 @@ vérification démarre automatiquement.
 - **Supprimer** : ouvrez le fichier, puis menu **…** → **Delete file**. Faites
   de même pour la photo.
 
-L'article d'exemple `2026-09-anastomoz-prend-forme` peut être supprimé dès que
+L'article d'exemple `2026-09-anastomose-prend-forme` peut être supprimé dès que
 la première vraie actualité est publiée.
 
 ---

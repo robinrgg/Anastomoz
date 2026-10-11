@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import emblem from '../assets/brand/logo-embleme.png';
+import poisson from '../assets/brand/poisson-anastomose.png';
 import { navigation, site } from '../data/site';
 import { url } from '../lib/url';
 
@@ -12,7 +12,7 @@ const isCurrent = (href: string) =>
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href={url('/')}>
-      <Image src={emblem} alt="" width={48} height={48} densities={[1, 2]} loading="eager" />
+      <Image src={poisson} alt="" height={40} densities={[1, 2]} loading="eager" />
       <span>{site.name.toLowerCase()}</span>
     </a>
 
@@ -80,12 +80,38 @@ const isCurrent = (href: string) =>
   .brand {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    font-size: 1.5rem;
+    gap: var(--space-3);
+    font-family: var(--font-display);
+    font-size: 1.625rem;
     font-weight: 500;
-    letter-spacing: 0.08em;
     color: var(--color-navy-700);
     text-decoration: none;
+  }
+
+  @media (max-width: 30rem) {
+    .site-header__inner {
+      column-gap: var(--space-2);
+    }
+
+    .brand {
+      gap: var(--space-2);
+      font-size: 1.3rem;
+    }
+
+    .brand img {
+      height: 28px;
+      width: auto;
+    }
+  }
+
+  @media (max-width: 22rem) {
+    .brand {
+      font-size: 1.15rem;
+    }
+
+    .brand img {
+      height: 22px;
+    }
   }
 
   .site-nav ul {
@@ -113,7 +139,7 @@ const isCurrent = (href: string) =>
     right: 0;
     bottom: 0.1rem;
     height: 2px;
-    background: var(--color-sand-500);
+    background: var(--color-steel-400);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.25s;
