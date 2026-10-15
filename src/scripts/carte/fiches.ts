@@ -46,10 +46,10 @@ const ANNEES_ESPECES = 10;
 interface Observation { code_operation: number | string; date_operation: string; nom_commun_taxon: string | null }
 interface PageObservations { data?: Observation[]; next?: string | null; count: number }
 
-/** Toutes les observations d'une station depuis une date (suit la pagination). */
+/** Toutes les observations d'un point de prélèvement depuis une date (suit la pagination). */
 async function observationsStation(code: string, depuis: string, signal: AbortSignal): Promise<Observation[]> {
   let url: string | null = `${HUBEAU}/v1/etat_piscicole/observations?${new URLSearchParams({
-    code_station: code,
+    code_point_prelevement_aspe: code,
     date_operation_min: depuis,
     fields: 'code_operation,date_operation,nom_commun_taxon',
     size: '20000',

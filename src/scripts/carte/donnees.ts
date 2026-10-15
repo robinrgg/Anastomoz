@@ -3,6 +3,7 @@ import { url } from '../../lib/url';
 // Stations préparées chaque mois par scripts/data/*.mjs (voir ARCHITECTURE.md).
 
 export interface StationPoisson {
+  /** Code du point de prélèvement (ASPE). */
   code: string;
   lat: number;
   lon: number;

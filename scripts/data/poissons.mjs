@@ -1,7 +1,10 @@
 // Prépare la couche « Poissons » de la carte interactive.
 //
 // Source : Hub'Eau, API « État piscicole » (données OFB, Licence Ouverte Etalab).
-// Pour chaque station, on garde la pêche la plus récente ayant une note IPR.
+// Pour chaque point de prélèvement, on garde la pêche la plus récente ayant une
+// note IPR. On regroupe par point (code_point_prelevement_aspe, toujours
+// renseigné) et non par station Sandre : beaucoup de points anciens n'ont pas de
+// code station, et ils étaient tous fusionnés en un seul.
 // La Corse n'a pas d'IPR (indice non applicable) : on y garde la dernière pêche.
 // La liste des espèces n'est pas stockée : la fiche l'interroge en direct.
 //
@@ -13,7 +16,7 @@ const API = `${HUBEAU}/v1/etat_piscicole`;
 const OUTPUT = 'public/data/carte/poissons.json';
 
 const COMMON_FIELDS = [
-  'code_station',
+  'code_point_prelevement_aspe',
   'libelle_station',
   'libelle_point_prelevement_wama',
   'code_operation',
@@ -26,22 +29,23 @@ const COMMON_FIELDS = [
   'protocole_peche',
 ];
 
-/** Garde, pour chaque station, la ligne la plus récente. */
-function latestByStation(rows) {
-  const byStation = new Map();
+/** Garde, pour chaque point de prélèvement, la ligne la plus récente. */
+function latestByPoint(rows) {
+  const byPoint = new Map();
   for (const row of rows) {
+    if (row.code_point_prelevement_aspe == null) continue;
     if (row.latitude == null || row.longitude == null || !isMetropole(row.code_departement)) continue;
-    const current = byStation.get(row.code_station);
-    if (!current || row.date_operation > current.date_operation) byStation.set(row.code_station, row);
+    const current = byPoint.get(row.code_point_prelevement_aspe);
+    if (!current || row.date_operation > current.date_operation) byPoint.set(row.code_point_prelevement_aspe, row);
   }
-  return [...byStation.values()];
+  return [...byPoint.values()];
 }
 
 const nom = (row) => (row.libelle_point_prelevement_wama || row.libelle_station || '').trim();
 
 function toRecord(row) {
   return [
-    row.code_station,
+    String(row.code_point_prelevement_aspe),
     round5(row.latitude),
     round5(row.longitude),
     nom(row),
@@ -61,7 +65,7 @@ const indicateurs = await getAllPages(`${API}/indicateurs`, {
   fields: [...COMMON_FIELDS, 'ipr_note', 'ipr_code_classe', 'ipr_libelle_classe'].join(','),
   ipr_note_min: '0',
 });
-const avecIpr = latestByStation(indicateurs.filter((row) => row.ipr_note != null));
+const avecIpr = latestByPoint(indicateurs.filter((row) => row.ipr_note != null));
 
 console.log('Pêches en Corse (IPR non applicable)…');
 const corse = [];
@@ -73,17 +77,25 @@ for (const departement of ['2A', '2B']) {
     })),
   );
 }
-const stationsIpr = new Set(avecIpr.map((row) => row.code_station));
-const sansIpr = latestByStation(corse).filter((row) => !stationsIpr.has(row.code_station));
+const pointsIpr = new Set(avecIpr.map((row) => row.code_point_prelevement_aspe));
+const sansIpr = latestByPoint(corse).filter((row) => !pointsIpr.has(row.code_point_prelevement_aspe));
 
-const stations = [...avecIpr, ...sansIpr].map(toRecord);
+// Quelques points distincts partagent exactement les mêmes coordonnées (point
+// recréé au même endroit) : on garde la pêche la plus récente.
+const parPosition = new Map();
+for (const row of [...avecIpr, ...sansIpr]) {
+  const cle = `${round5(row.latitude)},${round5(row.longitude)}`;
+  const actuel = parPosition.get(cle);
+  if (!actuel || row.date_operation > actuel.date_operation) parPosition.set(cle, row);
+}
+const stations = [...parPosition.values()].map(toRecord);
 assertMinimum('Stations poissons', stations.length, 5_000);
 
 await writeJson(OUTPUT, {
   genere: new Date().toISOString(),
   source: 'Hub’Eau, API État piscicole (OFB), Licence Ouverte Etalab',
   champs: [
-    'code_station',
+    'code_point',
     'lat',
     'lon',
     'nom',
@@ -98,4 +110,4 @@ await writeJson(OUTPUT, {
   ],
   stations,
 });
-console.log(`${OUTPUT} : ${avecIpr.length} stations avec IPR, ${sansIpr.length} stations en Corse.`);
+console.log(`${OUTPUT} : ${stations.length} points (${avecIpr.length} avec IPR, ${sansIpr.length} en Corse, avant dédoublonnage).`);

@@ -120,7 +120,7 @@ estompage du relief en mode produit, réseau hydrographique par-dessus ; effets 
 
 | Couche | Préparé à l'avance (GitHub Actions) | Interrogé en direct au clic |
 |---|---|---|
-| **Poissons** | Dernière pêche de chaque station : note et classe IPR, date, protocole (API État piscicole). Corse : dernière pêche, IPR non applicable. | Liste exhaustive des espèces capturées sur les 10 dernières années (à défaut : lors du dernier suivi) |
+| **Poissons** | Dernière pêche de chaque point de prélèvement (y compris les points anciens sans code station) : note et classe IPR, date, protocole (API État piscicole). Corse : dernière pêche, IPR non applicable. | Liste exhaustive des espèces capturées sur les 10 dernières années (à défaut : lors du dernier suivi) |
 | **Débits** | Stations en service ayant publié un débit sur les 15 derniers jours, avec module, Q25 et QMNA5 (`data/stations_debits.csv`) | Débit instantané et débits journaliers des 14 derniers jours |
 
 **Navigation** : un clic (ou un toucher) sélectionne la station la plus proche dans un
