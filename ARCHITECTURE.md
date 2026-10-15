@@ -120,7 +120,7 @@ estompage du relief en mode produit, réseau hydrographique par-dessus ; effets 
 
 | Couche | Préparé à l'avance (GitHub Actions) | Interrogé en direct au clic |
 |---|---|---|
-| **Poissons** | Dernière pêche de chaque point de prélèvement (y compris les points anciens sans code station) : note et classe IPR, date, protocole (API État piscicole). Corse : dernière pêche, IPR non applicable. | Liste exhaustive des espèces capturées sur les 10 dernières années (à défaut : lors du dernier suivi) |
+| **Poissons** | Dernière pêche de chaque point de prélèvement ASPE (API État piscicole, OFB) : note et classe IPR, date, protocole. Plus les stations Naïades (API Hydrobiologie, agences de l'eau) ayant une note IPR : une station à moins de 300 m d'un point ASPE est le même site, on garde la pêche la plus récente ; classe calculée avec les seuils 5, 16, 25, 36. Corse : dernière pêche, IPR non applicable. | Liste exhaustive des espèces capturées sur les 10 dernières années (à défaut : lors du dernier suivi), via l'API de la base d'origine |
 | **Débits** | Stations en service ayant publié un débit sur les 15 derniers jours, avec module, Q25 et QMNA5 (`data/stations_debits.csv`) | Débit instantané et débits journaliers des 14 derniers jours |
 
 **Navigation** : un clic (ou un toucher) sélectionne la station la plus proche dans un
@@ -141,6 +141,12 @@ API sont insérés comme texte, jamais comme HTML. Tous les liens externes du si
 s'ouvrent dans un nouvel onglet (`rel="noopener noreferrer"`), y compris dans les
 actualités (extension Markdown dans `astro.config.mjs`). Leaflet est installé via npm et servi
 par le site (aucun CDN). Graphique des débits dessiné en SVG, sans bibliothèque.
+
+**Noms des espèces** : `src/data/especes-poissons.csv` (séparateur `;`) associe chaque code
+taxon Sandre au nom latin, au nom proposé par l'OFB et au **nom validé** (colonne `nom_valide`,
+remplie à la main). Un nom validé remplace le nom affiché partout. Sans nom validé, les fiches
+ASPE gardent le nom de l'OFB et les fiches Naïades affichent le nom latin, en italique. Le
+fichier est intégré au site à la construction : une modification est publiée automatiquement.
 
 **Débits de référence** : `data/stations_debits.csv` provient de l'application
 Bilan hydro-météo (dépôt `turbo-app`). Pour le mettre à jour, remplacer le fichier

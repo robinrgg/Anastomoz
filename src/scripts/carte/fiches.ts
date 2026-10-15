@@ -1,6 +1,7 @@
 import type { StationHydro, StationPoisson } from './donnees';
 import { capitalize, formatDate, formatDebit, formatHour, h } from './dom';
 import { graphiqueDebits } from './graphique';
+import especesCsv from '../../data/especes-poissons.csv?raw';
 
 // Fiches affichées au clic sur une station. Les données « vivantes » (espèces,
 // débits) sont demandées à Hub'Eau à ce moment-là, depuis le navigateur.
@@ -43,7 +44,25 @@ const erreur = (texte: string) => h('p', { class: 'fiche__erreur', role: 'alert'
 /** Fenêtre de recherche des espèces : les 10 dernières années. */
 const ANNEES_ESPECES = 10;
 
-interface Observation { code_operation: number | string; date_operation: string; nom_commun_taxon: string | null }
+/**
+ * Noms français validés, par code taxon Sandre (src/data/especes-poissons.csv,
+ * colonne nom_valide). Sans nom validé : nom de l'OFB pour les pêches ASPE,
+ * nom latin pour les listes Naïades.
+ */
+const NOMS_VALIDES = new Map(
+  especesCsv
+    .trim()
+    .split(/\r?\n/)
+    .slice(1)
+    .map((ligne) => ligne.split(';'))
+    .filter(([, , , valide]) => valide?.trim())
+    .map(([code, , , valide]) => [code, valide.trim()]),
+);
+
+interface Espece { nom: string; latin: boolean }
+interface ListeEspeces { libelle: string; especes: Espece[]; derniere?: string }
+
+interface Observation { code_operation: number | string; date_operation: string; code_taxon: string | null; nom_commun_taxon: string | null }
 interface PageObservations { data?: Observation[]; next?: string | null; count: number }
 
 /** Toutes les observations d'un point de prélèvement depuis une date (suit la pagination). */
@@ -51,7 +70,7 @@ async function observationsStation(code: string, depuis: string, signal: AbortSi
   let url: string | null = `${HUBEAU}/v1/etat_piscicole/observations?${new URLSearchParams({
     code_point_prelevement_aspe: code,
     date_operation_min: depuis,
-    fields: 'code_operation,date_operation,nom_commun_taxon',
+    fields: 'code_operation,date_operation,code_taxon,nom_commun_taxon',
     size: '20000',
   })}`;
   const lignes: Observation[] = [];
@@ -65,8 +84,69 @@ async function observationsStation(code: string, depuis: string, signal: AbortSi
 
 const annee = (iso: string) => iso.slice(0, 4);
 
+/** Libellé de la liste : fenêtre de 10 ans ou dernier suivi. */
+function libelleListe(dates: string[], depuisIso: string, dernierSuivi: boolean, nbOperations: number) {
+  const annees = dates.map(annee).sort();
+  if (dernierSuivi) return `Espèces capturées lors du dernier suivi (${annees.at(-1)})`;
+  return nbOperations > 1
+    ? `Espèces capturées depuis ${annee(depuisIso)} · ${nbOperations} pêches, de ${annees[0]} à ${annees.at(-1)}`
+    : `Espèces capturées lors de la pêche de ${annees[0]}`;
+}
+
+function trier(especes: Espece[]): Espece[] {
+  const parNom = new Map(especes.map((e) => [e.nom, e]));
+  return [...parNom.values()].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+}
+
+/** Base ASPE (OFB) : observations des 10 dernières années, sinon de la dernière pêche. */
+async function especesAspe(station: StationPoisson, depuisIso: string, signal: AbortSignal): Promise<ListeEspeces> {
+  let lignes = await observationsStation(station.code, depuisIso, signal);
+  const dernierSuivi = lignes.length === 0;
+  if (dernierSuivi) {
+    lignes = await hubeau<Observation>('/v1/etat_piscicole/observations', {
+      code_operation: station.codeOperation,
+      fields: 'code_operation,date_operation,code_taxon,nom_commun_taxon',
+      size: '5000',
+    }, signal);
+  }
+  const dates = lignes.map((l) => l.date_operation);
+  return {
+    libelle: libelleListe(dates.length ? dates : [station.date], depuisIso, dernierSuivi, new Set(lignes.map((l) => String(l.code_operation))).size),
+    derniere: dates.length ? annee(dates.sort().at(-1)!) : undefined,
+    especes: trier(lignes.flatMap((l) => {
+      const nom = (l.code_taxon && NOMS_VALIDES.get(String(l.code_taxon))) || l.nom_commun_taxon;
+      return nom ? [{ nom, latin: false }] : [];
+    })),
+  };
+}
+
+interface TaxonNaiades { code_appel_taxon: string; libelle_appel_taxon: string; date_prelevement: string; code_prelevement: string }
+
+/** Base Naïades : listes faunistiques « poissons » de la station, si elles sont publiées. */
+async function especesNaiades(station: StationPoisson, depuisIso: string, signal: AbortSignal): Promise<ListeEspeces> {
+  const dernierSuivi = station.date < depuisIso;
+  const lignes = await hubeau<TaxonNaiades>('/v1/hydrobio/taxons', {
+    code_station_hydrobio: station.code,
+    code_support: '4',
+    date_debut_prelevement: dernierSuivi ? station.date : depuisIso,
+    fields: 'code_appel_taxon,libelle_appel_taxon,date_prelevement,code_prelevement',
+    size: '5000',
+  }, signal);
+  const dates = lignes.map((l) => l.date_prelevement);
+  return {
+    libelle: lignes.length
+      ? libelleListe(dates, depuisIso, dernierSuivi, new Set(lignes.map((l) => l.code_prelevement)).size)
+      : 'Espèces capturées',
+    especes: trier(lignes.map((l) => {
+      const valide = NOMS_VALIDES.get(l.code_appel_taxon);
+      return valide ? { nom: valide, latin: false } : { nom: l.libelle_appel_taxon, latin: true };
+    })),
+  };
+}
+
 export function fichePoisson(station: StationPoisson, signal: AbortSignal): HTMLElement {
   const lieu = [station.coursEau, capitalize(station.commune)].filter(Boolean).join(' · ');
+  const naiades = station.source === 'naiades';
 
   const ipr =
     station.iprNote !== null
@@ -93,7 +173,7 @@ export function fichePoisson(station: StationPoisson, signal: AbortSignal): HTML
     ),
     titreEspeces,
     especes,
-    h('p', { class: 'fiche__source' }, 'Source : Hub’Eau'),
+    h('p', { class: 'fiche__source' }, naiades ? 'Source : Hub’Eau · Naïades' : 'Source : Hub’Eau · OFB'),
   );
 
   // Liste exhaustive des espèces capturées sur les 10 dernières années ; à défaut
@@ -102,32 +182,19 @@ export function fichePoisson(station: StationPoisson, signal: AbortSignal): HTML
   depuis.setFullYear(depuis.getFullYear() - ANNEES_ESPECES);
   const depuisIso = depuis.toISOString().slice(0, 10);
 
-  observationsStation(station.code, depuisIso, signal)
-    .then(async (lignes) => {
-      let libelle: string;
-      if (lignes.length > 0) {
-        const operations = new Set(lignes.map((l) => String(l.code_operation)));
-        const annees = lignes.map((l) => annee(l.date_operation)).sort();
-        derniere.textContent = annees.at(-1)!;
-        libelle = operations.size > 1
-          ? `Espèces capturées depuis ${annee(depuisIso)} · ${operations.size} pêches, de ${annees[0]} à ${annees.at(-1)}`
-          : `Espèces capturées lors de la pêche de ${annees[0]}`;
-      } else {
-        lignes = await hubeau<Observation>('/v1/etat_piscicole/observations', {
-          code_operation: station.codeOperation,
-          fields: 'code_operation,date_operation,nom_commun_taxon',
-          size: '5000',
-        }, signal);
-        libelle = `Espèces capturées lors du dernier suivi (${annee(station.date)})`;
+  (naiades ? especesNaiades(station, depuisIso, signal) : especesAspe(station, depuisIso, signal))
+    .then((liste) => {
+      titreEspeces.textContent = liste.libelle;
+      if (liste.derniere) derniere.textContent = liste.derniere;
+      const blocs: Node[] = [
+        liste.especes.length > 0
+          ? h('ul', { class: 'especes__liste' }, ...liste.especes.map((e) => h('li', {}, e.latin ? h('i', {}, e.nom) : e.nom)))
+          : h('p', { class: 'fiche__note' }, naiades ? 'Liste des espèces non publiée pour cette station.' : 'Aucun poisson capturé.'),
+      ];
+      if (liste.especes.some((e) => e.latin)) {
+        blocs.push(h('p', { class: 'fiche__note' }, 'Noms en italique : noms scientifiques, noms français en cours de vérification.'));
       }
-      const noms = [...new Set(lignes.map((l) => l.nom_commun_taxon).filter((n): n is string => Boolean(n)))]
-        .sort((a, b) => a.localeCompare(b, 'fr'));
-      titreEspeces.textContent = libelle;
-      especes.replaceChildren(
-        noms.length === 0
-          ? h('p', { class: 'fiche__note' }, 'Aucun poisson capturé.')
-          : h('ul', { class: 'especes__liste' }, ...noms.map((nom) => h('li', {}, nom))),
-      );
+      especes.replaceChildren(...blocs);
     })
     .catch((e) => {
       if (!signal.aborted) especes.replaceChildren(erreur(`Liste des espèces indisponible : ${e.message}`));

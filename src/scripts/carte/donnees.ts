@@ -1,9 +1,9 @@
 import { url } from '../../lib/url';
 
-// Stations préparées chaque mois par scripts/data/*.mjs (voir ARCHITECTURE.md).
+// Stations préparées par par scripts/data/*.mjs (voir ARCHITECTURE.md).
 
 export interface StationPoisson {
-  /** Code du point de prélèvement (ASPE). */
+  /** Code du point de prélèvement (ASPE) ou de la station (Naïades). */
   code: string;
   lat: number;
   lon: number;
@@ -16,6 +16,8 @@ export interface StationPoisson {
   iprNote: number | null;
   iprClasse: number | null;
   iprLibelle: string | null;
+  /** Base d'origine : ASPE (OFB) ou Naïades (agences de l'eau, État). */
+  source: 'aspe' | 'naiades';
 }
 
 export interface StationHydro {
@@ -37,7 +39,7 @@ interface Fichier<T> {
   stations: T[];
 }
 
-type LignePoisson = [string, number, number, string, string | null, string | null, string, string, string | null, number | null, number | null, string | null];
+type LignePoisson = [string, number, number, string, string | null, string | null, string, string, string | null, number | null, number | null, string | null, 'aspe' | 'naiades'];
 type LigneHydro = [string, number, number, string, string | null, string | null, number | null, number | null, number | null, number | null];
 
 async function charger<T>(chemin: string): Promise<Fichier<T>> {
@@ -51,8 +53,8 @@ export async function chargerPoissons() {
   return {
     genere: fichier.genere,
     stations: fichier.stations.map(
-      ([code, lat, lon, nom, coursEau, commune, date, codeOperation, protocole, iprNote, iprClasse, iprLibelle]): StationPoisson => ({
-        code, lat, lon, nom, coursEau, commune, date, codeOperation, protocole, iprNote, iprClasse, iprLibelle,
+      ([code, lat, lon, nom, coursEau, commune, date, codeOperation, protocole, iprNote, iprClasse, iprLibelle, source]): StationPoisson => ({
+        code, lat, lon, nom, coursEau, commune, date, codeOperation, protocole, iprNote, iprClasse, iprLibelle, source,
       }),
     ),
   };
