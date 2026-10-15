@@ -125,10 +125,11 @@ interface TaxonNaiades { code_appel_taxon: string; libelle_appel_taxon: string; 
 /** Base Naïades : listes faunistiques « poissons » de la station, si elles sont publiées. */
 async function especesNaiades(station: StationPoisson, depuisIso: string, signal: AbortSignal): Promise<ListeEspeces> {
   const dernierSuivi = station.date < depuisIso;
+  // Dernier suivi : filtre par code de prélèvement (date_debut_prelevement exclut
+  // le jour donné, il ne retrouverait pas la pêche elle-même).
   const lignes = await hubeau<TaxonNaiades>('/v1/hydrobio/taxons', {
-    code_station_hydrobio: station.code,
+    ...(dernierSuivi ? { code_prelevement: station.codeOperation } : { code_station_hydrobio: station.code, date_debut_prelevement: depuisIso }),
     code_support: '4',
-    date_debut_prelevement: dernierSuivi ? station.date : depuisIso,
     fields: 'code_appel_taxon,libelle_appel_taxon,date_prelevement,code_prelevement',
     size: '5000',
   }, signal);
