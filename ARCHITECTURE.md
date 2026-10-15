@@ -142,11 +142,12 @@ s'ouvrent dans un nouvel onglet (`rel="noopener noreferrer"`), y compris dans le
 actualités (extension Markdown dans `astro.config.mjs`). Leaflet est installé via npm et servi
 par le site (aucun CDN). Graphique des débits dessiné en SVG, sans bibliothèque.
 
-**Noms des espèces** : `src/data/especes-poissons.csv` (séparateur `;`) associe chaque code
-taxon Sandre au nom latin, au nom proposé par l'OFB et au **nom validé** (colonne `nom_valide`,
-remplie à la main). Un nom validé remplace le nom affiché partout. Sans nom validé, les fiches
-ASPE gardent le nom de l'OFB et les fiches Naïades affichent le nom latin, en italique. Le
-fichier est intégré au site à la construction : une modification est publiée automatiquement.
+**Noms des espèces** : `src/data/especes-poissons.csv` (séparateur `;`), validé à la main.
+Pour chaque code taxon Sandre : nom latin (pour repère), `nom_commun` affiché dans toutes
+les fiches (OFB et Naïades), `afficher` (`non` pour masquer un taxon, par exemple un taxon
+indéterminé ou un hybride). Un taxon absent de la table garde le nom de l'OFB (fiches
+ASPE) ou son nom latin en italique (fiches Naïades). Le fichier est intégré au site à la
+construction : une modification est publiée automatiquement.
 
 **Débits de référence** : `data/stations_debits.csv` provient de l'application
 Bilan hydro-météo (dépôt `turbo-app`). Pour le mettre à jour, remplacer le fichier

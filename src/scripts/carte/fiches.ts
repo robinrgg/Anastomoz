@@ -45,19 +45,17 @@ const erreur = (texte: string) => h('p', { class: 'fiche__erreur', role: 'alert'
 const ANNEES_ESPECES = 10;
 
 /**
- * Noms français validés, par code taxon Sandre (src/data/especes-poissons.csv,
- * colonne nom_valide). Sans nom validé : nom de l'OFB pour les pêches ASPE,
- * nom latin pour les listes Naïades.
+ * Table des espèces (src/data/especes-poissons.csv) : nom français par code taxon
+ * Sandre, et taxons à ne pas afficher (colonne afficher = non). Un taxon absent
+ * de la table garde le nom de l'OFB (fiches ASPE) ou son nom latin (fiches Naïades).
  */
-const NOMS_VALIDES = new Map(
-  especesCsv
-    .trim()
-    .split(/\r?\n/)
-    .slice(1)
-    .map((ligne) => ligne.split(';'))
-    .filter(([, , , valide]) => valide?.trim())
-    .map(([code, , , valide]) => [code, valide.trim()]),
-);
+const TABLE_ESPECES = especesCsv
+  .trim()
+  .split(/\r?\n/)
+  .slice(1)
+  .map((ligne) => ligne.split(';').map((v) => v.trim()));
+const NOMS = new Map(TABLE_ESPECES.filter(([, , nom]) => nom).map(([code, , nom]) => [code, nom]));
+const MASQUES = new Set(TABLE_ESPECES.filter(([, , , afficher]) => afficher === 'non').map(([code]) => code));
 
 interface Espece { nom: string; latin: boolean }
 interface ListeEspeces { libelle: string; especes: Espece[]; derniere?: string }
@@ -114,7 +112,9 @@ async function especesAspe(station: StationPoisson, depuisIso: string, signal: A
     libelle: libelleListe(dates.length ? dates : [station.date], depuisIso, dernierSuivi, new Set(lignes.map((l) => String(l.code_operation))).size),
     derniere: dates.length ? annee(dates.sort().at(-1)!) : undefined,
     especes: trier(lignes.flatMap((l) => {
-      const nom = (l.code_taxon && NOMS_VALIDES.get(String(l.code_taxon))) || l.nom_commun_taxon;
+      const code = String(l.code_taxon ?? '');
+      if (MASQUES.has(code)) return [];
+      const nom = NOMS.get(code) ?? l.nom_commun_taxon;
       return nom ? [{ nom, latin: false }] : [];
     })),
   };
@@ -137,9 +137,10 @@ async function especesNaiades(station: StationPoisson, depuisIso: string, signal
     libelle: lignes.length
       ? libelleListe(dates, depuisIso, dernierSuivi, new Set(lignes.map((l) => l.code_prelevement)).size)
       : 'Espèces capturées',
-    especes: trier(lignes.map((l) => {
-      const valide = NOMS_VALIDES.get(l.code_appel_taxon);
-      return valide ? { nom: valide, latin: false } : { nom: l.libelle_appel_taxon, latin: true };
+    especes: trier(lignes.flatMap((l) => {
+      if (MASQUES.has(l.code_appel_taxon)) return [];
+      const nom = NOMS.get(l.code_appel_taxon);
+      return [nom ? { nom, latin: false } : { nom: l.libelle_appel_taxon, latin: true }];
     })),
   };
 }
@@ -192,7 +193,7 @@ export function fichePoisson(station: StationPoisson, signal: AbortSignal): HTML
           : h('p', { class: 'fiche__note' }, naiades ? 'Liste des espèces non publiée pour cette station.' : 'Aucun poisson capturé.'),
       ];
       if (liste.especes.some((e) => e.latin)) {
-        blocs.push(h('p', { class: 'fiche__note' }, 'Noms en italique : noms scientifiques, noms français en cours de vérification.'));
+        blocs.push(h('p', { class: 'fiche__note' }, 'Noms en italique : noms scientifiques (pas encore de nom français validé).'));
       }
       especes.replaceChildren(...blocs);
     })
