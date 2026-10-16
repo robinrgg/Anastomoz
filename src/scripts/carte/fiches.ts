@@ -8,18 +8,35 @@ import especesCsv from '../../data/especes-poissons.csv?raw';
 
 const HUBEAU = 'https://hubeau.eaufrance.fr/api';
 
+/** Délai au-delà duquel on abandonne une requête (Hub'Eau peut mettre 60 s à renvoyer une erreur). */
+const DELAI_MS = 20_000;
+
 /** Requête JSON vers Hub'Eau, avec une nouvelle tentative (le service a des ratés passagers). */
 async function recuperer<T>(url: string, signal: AbortSignal, essais = 2): Promise<T> {
+  const controle = new AbortController();
+  const arreter = () => controle.abort();
+  const minuterie = setTimeout(arreter, DELAI_MS);
+  signal.addEventListener('abort', arreter, { once: true });
   try {
-    const res = await fetch(url, { signal });
-    if (res.status !== 200 && res.status !== 206) throw new Error(`Hub’Eau indisponible (${res.status})`);
+    const res = await fetch(url, { signal: controle.signal });
+    if (res.status !== 200 && res.status !== 206) throw new Error(`erreur ${res.status}`);
     return await res.json();
   } catch (e) {
-    if (signal.aborted || essais <= 1) throw e;
+    if (signal.aborted) throw e;
+    if (essais <= 1) {
+      throw new Error(controle.signal.aborted ? 'pas de réponse' : e instanceof Error ? e.message : String(e));
+    }
     await new Promise((resolve) => setTimeout(resolve, 1500));
     return recuperer(url, signal, essais - 1);
+  } finally {
+    clearTimeout(minuterie);
+    signal.removeEventListener('abort', arreter);
   }
 }
+
+/** Message d'erreur lisible quand Hub'Eau ne répond pas. */
+const indisponible = (quoi: string, e: Error) =>
+  `${quoi} : le service Hub’Eau ne répond pas (${e.message}). Réessayez plus tard.`;
 
 async function hubeau<T>(chemin: string, params: Record<string, string>, signal: AbortSignal): Promise<T[]> {
   const corps = await recuperer<{ data?: T[] }>(`${HUBEAU}${chemin}?${new URLSearchParams(params)}`, signal);
@@ -199,7 +216,7 @@ export function fichePoisson(station: StationPoisson, signal: AbortSignal): HTML
       especes.replaceChildren(...blocs);
     })
     .catch((e) => {
-      if (!signal.aborted) especes.replaceChildren(erreur(`Liste des espèces indisponible : ${e.message}`));
+      if (!signal.aborted) especes.replaceChildren(erreur(indisponible('Liste des espèces momentanément indisponible', e)));
     });
 
   return fiche;
@@ -281,7 +298,7 @@ export function ficheHydro(station: StationHydro, signal: AbortSignal): HTMLElem
       contenu.replaceChildren(...blocs);
     })
     .catch((e) => {
-      if (!signal.aborted) contenu.replaceChildren(erreur(`Débits indisponibles : ${e.message}`));
+      if (!signal.aborted) contenu.replaceChildren(erreur(indisponible('Débits momentanément indisponibles', e)));
     });
 
   return fiche;
